@@ -1,0 +1,68 @@
+# Cheetah template to generate Arch Linux PKGBUILD files
+
+# Maintainer: \$Maintainer
+
+# Mandatory or near practically mandatory metadata
+pkgname=$Name
+pkgver=$Version
+pkgrel=$ReleaseVersion
+pkgdesc="$BriefDescription"
+url="$URL"
+arch=(#slurp
+#for $arch in $SupportedArchitectures
+'$arch' #slurp
+#end for
+)
+license=(#slurp
+#for $license in $Licenses
+'$license' #slurp
+#end for
+)
+depends=(#slurp
+#for $dep in $Dependencies
+'$dep' #slurp
+#end for
+)
+makedepends=(#slurp
+#for $dep in $BuildDependencies
+'$dep' #slurp
+#end for
+)
+source=(#slurp
+#for $source in $Sources
+$source #slurp
+#end for
+)
+
+md5sums=()
+
+# Optional
+groups=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+noextract=()
+install=
+changelog=
+
+# Mandatory
+build() {
+  cd "\$srcdir/\$pkgname-\$pkgver"
+
+  #for $cmd in $BuildCommands
+  $cmd
+  #end for
+}
+
+# Optional
+package() {
+  cd "\$srcdir/\$pkgname-\$pkgver"
+
+  #for $cmd in $InstallCommands
+  $cmd
+  #end for
+}
+

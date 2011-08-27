@@ -1,0 +1,14 @@
+#!/usr/bin/env python2
+
+import sys
+from deploymentkit import core, archlinux
+
+if __name__ == '__main__':
+
+    if not len(sys.argv) == 3:
+        print 'Usage: %s input.yaml outputdir'
+        sys.exit(1)
+
+    input, out_dir = sys.argv[1:]
+
+    core.generate_recipe(input, out_dir)
