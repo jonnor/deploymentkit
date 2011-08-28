@@ -3,6 +3,8 @@ import os.path
 
 import yaml
 
+import deploymentkit
+
 """Target independent package recipe
 
 This is similar to what the native GNU/Linux packaging systems use 
@@ -49,7 +51,7 @@ class PackageRecipe(object):
         
         if not target_platform:
             # TODO: option to autodetect the current platform
-            target_platform = supported_platforms['ArchLinux']()
+            target_platform = deploymentkit.supported_targets['ArchLinux']
 
         return target_platform.generate_recipe(self)
 

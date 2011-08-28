@@ -1,6 +1,6 @@
 import unittest, os
 
-from deploymentkit import archlinux, core
+from deploymentkit import linux, archlinux, core
 
 pkgbuild_attribute = archlinux.pkgbuild_attribute
 
@@ -51,7 +51,7 @@ class TestPkgbuildGeneration(unittest.TestCase):
         pkg = core.PackageRecipe()
 
         pkg.data = input_metadata
-        target = archlinux.ArchLinux()
+        target = linux.Linux('ArchLinux')
         output = target.generate_recipe(pkg)
 
         self.str = output['PKGBUILD']
