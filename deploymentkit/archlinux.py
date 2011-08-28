@@ -56,14 +56,19 @@ def generic_to_specific_recipe(generic_data):
     # Resolve dependencies to native packages
     specific_data['Dependencies'] = []
     for dep in copy.copy(generic_data['Dependencies']):
-        if not dep.startswith('pkg-config:'):
-            # TODO: support other deps than pkg-config ones
+        if dep.startswith('pkg-config:'):
+            pkgconfig_str = dep.split('pkg-config:')[1]
+            pkg_name = package_from_pkgconfig(pkgconfig_str)
+            specific_data['Dependencies'].append(pkg_name)
+            
+        elif dep.startswith('executable:'):
+            executable_name = dep.split('executable:')[1]
+            pkg_name = package_from_executable(executable_name)
+            specific_data['Dependencies'].append(pkg_name)
+            
+        else:
+            # TODO: support other depencency types
             raise NotImplementedError
-
-        pkgconfig_str = dep.split('pkg-config:')[1]
-
-        pkg_name = package_from_pkgconfig(pkgconfig_str)
-        specific_data['Dependencies'].append(pkg_name)
 
     # TODO: support this as well
     specific_data['BuildDependencies'] = []
@@ -77,8 +82,27 @@ def generic_to_specific_recipe(generic_data):
 
 def package_from_executable(executable_name):
     """Return the name of the package that should be used to provide @executable_name"""
-    raise NotImplementedError
 
+    not_installed = subprocess.check_call(['which', executable_name])
+    if not_installed:
+        # Naive approach:
+        # Walk PATH and search in package database for package containing
+        # files that matches
+        #
+        # Problem: some packages will add additional directories
+        # to path when installed, with no way to know which ones these are
+        # Only real solution here is for packages to have a provides(executable:executable-name)
+        # that can be queried from the database. Should then be accesible through PackageKit
+        raise NotImplementedError
+    
+    executable_path = subprocess.check_output(['which', executable_name]).strip()
+
+    # Arch Linux specific
+    output = subprocess.check_output(['pacman', '-Qo', executable_path])
+    # Output is on form: "/usr/lib/pkgconfig/sm.pc is owned by libsm 1.2.0-1"
+    package_id = output.split()[-2]
+
+    return package_id
 
 def package_from_pkgconfig(pkg_config_string):
     """Return the name of package that should be used to provide @pkg_config_strig."""
