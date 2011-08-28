@@ -20,7 +20,7 @@ installed_file_to_package_mappers = {
 class Linux(core.TargetPlatform):
     def __init__(self, distro):
         core.TargetPlatform.__init__(self)
-        
+
         self._distro = distro
 
     def generate_recipe(self, pkg_recipe):
@@ -30,7 +30,7 @@ class Linux(core.TargetPlatform):
         # Map target independent values into target specific values.
         target_pkg_recipe = generic_to_specific_recipe(self._distro, pkg_recipe.data)
 
-        # Create the target specific recipe          
+        # Create the target specific recipe
         generator = recipe_generators[self._distro]
         try:
             output = generator(target_pkg_recipe)
@@ -60,8 +60,8 @@ def generic_to_specific_recipe(target, generic_data):
         build_commands = ['./configure --prefix=/usr', 'make']
         install_commands = ['make DESTDIR="$pkgdir" install']
     else:
-        build_commands = []
-        install_commands = []
+        build_commands = ['%configure --disable-static', 'make %{?jobs:-j%jobs}']
+        install_commands = ['%makeinstall', 'find %{buildroot} -type f -name "*.la" -delete -print']
 
     specific_data['BuildCommands'] = build_commands
     specific_data['InstallCommands'] = install_commands
@@ -69,29 +69,47 @@ def generic_to_specific_recipe(target, generic_data):
     # Resolve dependencies to native packages
     specific_data['Dependencies'] = []
     for dep in generic_data['Dependencies']:
-        if dep.startswith('pkg-config:'):
-            pkgconfig_str = dep.split('pkg-config:')[1]
-            pkg_name = package_from_pkgconfig(target, pkgconfig_str)
-            specific_data['Dependencies'].append(pkg_name)
-            
-        elif dep.startswith('executable:'):
-            executable_name = dep.split('executable:')[1]
-            pkg_name = package_from_executable(target, executable_name)
-            specific_data['Dependencies'].append(pkg_name)
-            
-        else:
-            # TODO: support other depencency types
-            raise NotImplementedError
+        specific_data['Dependencies'].append(map_dependency(target, dep))
 
-    # TODO: support this as well
     specific_data['BuildDependencies'] = []
+    for dep in generic_data['BuildDependencies']:
+        specific_data['BuildDependencies'].append(map_dependency(target, dep))
 
     # Target specific
     if target == 'ArchLinux':
         specific_data['SupportedArchitectures'] = ['i686', 'x86_64']
 
+    elif target == 'OpenSUSE':
+        specific_data['PrepCommands'] = ['%setup -q']
+        specific_data['CleanCommands'] = ['rm -rf %{buildroot}']
+
+        specific_data['Files'] = """%defattr(-,root,root)
+%{_includedir}/*
+%{_libdir}/*"""
+
+        # TODO: only if the package is of type=library or similar
+        update_ldconfig = '-p /sbin/ldconfig'
+        specific_data['PostUninstall'] = update_ldconfig
+        specific_data['PostInstall'] = update_ldconfig
+
     return specific_data
 
+def map_dependency(target, dependency_string):
+    dep = dependency_string
+
+    if dep.startswith('pkg-config:'):
+        pkgconfig_str = dep.split('pkg-config:')[1]
+        pkg_name = package_from_pkgconfig(target, pkgconfig_str)
+
+    elif dep.startswith('executable:'):
+        executable_name = dep.split('executable:')[1]
+        pkg_name = package_from_executable(target, executable_name)
+
+    else:
+        # TODO: support other depencency types
+        raise NotImplementedError
+
+    return pkg_name
 
 def package_from_executable(target, executable_name):
     """Return the name of the package that should be used to provide @executable_name"""
@@ -107,12 +125,16 @@ def package_from_executable(target, executable_name):
         # Only real solution here is for packages to have a provides(executable:executable-name)
         # that can be queried from the database. Should then be accesible through PackageKit
         raise NotImplementedError
-    
+
     executable_path = subprocess.check_output(['which', executable_name]).strip()
 
     # Target specific
-    package_mapper = installed_file_to_package_mappers[target]
-    package_id = package_mapper(executable_path)
+    use_packagekit = True
+    if use_packagekit:
+        package_id = package_from_file_packagekit_subprocess(executable_path)
+    else:
+        package_mapper = installed_file_to_package_mappers[target]
+        package_id = package_mapper(executable_path)
 
     return package_id
 
@@ -132,16 +154,20 @@ def package_from_pkgconfig(target, pkg_config_string):
 
 def package_from_pkgconfig_packagekit(target, pkg_config_id):
 
-    # FIXME: use packagekit-python, instead of pkcon
+    pkg_config_file = pkg_config_id + '.pc'
+    pkg_name = package_from_file_packagekit_subprocess(pkg_config_file)
+    return pkg_name
+
+def package_from_file_packagekit_python(filepath):
     # As of 28.08.2011 on Arch Linux the search_file query fails
     # with unable to find dbus method SearchFiles with signature (ss)
 
-    #import packagekit.client
-    #pk_client = packagekit.client.PackageKitClient()
-    #packages = pk_client.search_file(pkg_config_id + '.pc')
+    import packagekit.client
+    pk_client = packagekit.client.PackageKitClient()
+    packages = pk_client.search_file(filepath)
 
-    pkg_config_file = pkg_config_id + '.pc'
-    output = subprocess.check_output(['pkcon', 'search', 'file', pkg_config_file])
+def package_from_file_packagekit_subprocess(filepath):
+    output = subprocess.check_output(['pkcon', 'search', 'file', filepath])
     # Output is on the form
     #Transaction:   Searching by name
     #Status:    Querying
@@ -183,12 +209,11 @@ def package_from_pkgconfig_packagekit(target, pkg_config_id):
     # $pkgname-$version-$build_revision
     # where only $pkgname can contain dashes
     # gegl-gtk-git-20110721-1 -> gegl-gtk-git
-    pkg_name = '.'.join(pkg.split('-')[0:-2])
+    pkg_name = '-'.join(pkg.split('-')[0:-2])
 
     return pkg_name
 
 def package_from_pkgconfig_fallback(target, pkg_config_id):
-
     # Check if package is installed
     args = ['pkg-config', '--exists', pkg_config_id]
     is_installed = not subprocess.call(args)

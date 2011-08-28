@@ -74,14 +74,18 @@ class TargetPlatform(object):
         pass
 
 
-def generate_recipe(input_file, output_prefix):
+def generate_recipe(input_file, output_prefix, target_id):
 	"""Generate the target-specific package recipie from
 	the YAML @input_file, and write the files to the path @output_prefix."""
 	
 	pkg = PackageRecipe()
 	pkg.data = yaml.load(open(input_file).read())
 
-	output_files = pkg.output_target_recipe()
+	if target_id:
+	    target = deploymentkit.supported_targets[target_id]
+	else:
+	    target = None # Autodetect
+	output_files = pkg.output_target_recipe(target)
 	
 	for filename, file_content in output_files.items():
 		if not os.path.exists(output_prefix):

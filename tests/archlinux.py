@@ -42,6 +42,7 @@ input_metadata = {
     'Licenses': ['GPL', 'custom'],
     'BuildSystemType': 'autotools',
     'Dependencies': [],
+    'BuildDependencies': [],
     'Sources': [],
 }
 
