@@ -9,5 +9,5 @@ setup(name='DeploymentKit',
     author_email='jononor@gmail.com',
     url='http://www.jonnor.com', # TEMP
     packages=['deploymentkit'],
-    scripts=['bin/dk-build-recipe'],
+    scripts=['bin/dk-generate'],
     )
