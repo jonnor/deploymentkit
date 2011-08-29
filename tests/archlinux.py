@@ -51,7 +51,7 @@ class TestPkgbuildGeneration(unittest.TestCase):
     def setUp(self):
         pkg = core.PackageRecipe()
 
-        pkg.data = input_metadata
+        pkg.load(input_metadata)
         target = linux.Linux('ArchLinux')
         output = target.generate_recipe(pkg)
 

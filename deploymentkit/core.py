@@ -130,12 +130,27 @@ class PackageRecipe(object):
     """ """
 
     def __init__(self):
-        self.data = {}
+        self._data = dict(default_metadata)
+
+    def load(self, mapping):
+        """Load the metadata from @mapping."""
+        self._data = dict(default_metadata)
+        self._data.update(mapping)
+
+    def load_from_string(self, string):
+        """Load the metadata from @string in YAML format."""
+        mapping = yaml.load(string)
+        self.load(mapping)
+
+    def get_data(self):
+        # Return copy so that it cannot be mutated by others
+        return dict(self._data)
+    data = property(get_data)
 
     def output_target_recipe(self, target_platform=None):
         """Generate the target-specific recipe.
         Returns a mapping {"filename": "content"}"""
-        
+
         if not target_platform:
             # TODO: option to autodetect the current platform
             target_platform = deploymentkit.supported_targets['ArchLinux']
@@ -151,7 +166,7 @@ supported_platforms = {}
 
 class TargetPlatform(object):
     """Interface class for a target platform."""
-    
+
     def __init__(self):
         pass
 
@@ -162,22 +177,21 @@ class TargetPlatform(object):
 
 
 def generate_recipe(input_file, output_prefix, target_id):
-	"""Generate the target-specific package recipie from
-	the YAML @input_file, and write the files to the path @output_prefix."""
-	
-	pkg = PackageRecipe()
-	pkg.data = yaml.load(open(input_file).read())
+        """Generate the target-specific package recipie from
+        the YAML @input_file, and write the files to the path @output_prefix."""
 
-	if target_id:
-	    target = deploymentkit.supported_targets[target_id]
-	else:
-	    target = None # Autodetect
-	output_files = pkg.output_target_recipe(target)
-	
-	for filename, file_content in output_files.items():
-		if not os.path.exists(output_prefix):
-		    os.makedirs(output_prefix)
-		f = open(os.path.join(output_prefix, filename), 'w')
-		f.write(file_content)
-		f.close()
-	
+        pkg = PackageRecipe()
+        pkg.load_from_string(open(input_file).read())
+
+        if target_id:
+            target = deploymentkit.supported_targets[target_id]
+        else:
+            target = None # Autodetect
+        output_files = pkg.output_target_recipe(target)
+
+        for filename, file_content in output_files.items():
+                if not os.path.exists(output_prefix):
+                    os.makedirs(output_prefix)
+                f = open(os.path.join(output_prefix, filename), 'w')
+                f.write(file_content)
+                f.close()
