@@ -3,7 +3,7 @@ DeploymentKit - Making it easy to deploy native packages
 License: LGPLv2+
 Maintainer:
     Jon Nordby <jononor@gmail.com>
-Dependencies: 
+Dependencies:
     Python (2.7+ at the moment)
     pyyaml
     Cheetah
@@ -23,11 +23,18 @@ export PYTHONPATH=./
 
 # Installing and using from install
 python ./setup.py install
-dk-generate
+dk-generate package.yaml
 
-Pass the --help flag for more information.
+See "dk-generate --help" and "dk-generate --help-input" for more information.
 
 = Principle =
+DeploymentKit defines a generic package metadata format (1),
+and from this generates the target-specific package recipe (2).
+
+The package recipe (2) and the source code (0) is then consumed
+by the package builder to produce the binary distributable package
+that the user can install.
+
                                                         0.
                                                     source code
                                                         |
@@ -37,12 +44,6 @@ package --> | DeploymentKit | --> specific --> | "PackageBuilder" * | -->  distr
 metadata    -----------------     package      ----------------------      package
                                   recipe                                   for target
 
-DeploymentKit defines a generic package metadata format (1),
-and from this generates the target-specific package recipe (2).
-
-The package recipe (2) and the source code (0) is then consumed 
-by the package builder to produce the binary distributable package
-that the user can install.
 
 * The package builder is not provided by DeploymentKit, but
 shown here for completeness. A cross-target solutions like
@@ -87,7 +88,7 @@ Criteria:
  * Mandriva
  * Gentoo
  * other GNU/Linux...
- 
+
  * Windows mingw32 (MSI/NSIS)
  * Mac OSX (macports/fink/dmg/app bundle)
 
@@ -102,8 +103,9 @@ Criteria:
 PackageKit:
     * Method of querying package for executables
     * Method of querying package for pkg-config identifiers
-    
+
 Open Build Service:
     * Arch Linux support (2011 OpenSUSE GSOC)
-    * Support for running DeploymentKit 
+    * Support for running DeploymentKit
     to generate the target recipes
+

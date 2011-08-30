@@ -2,13 +2,18 @@
 
 import sys, optparse
 
+import deploymentkit
 from deploymentkit import core
+
+def target_help_string():
+    supported = ' '.join(deploymentkit.supported_targets.keys())
+    return "Target platform to generate for. Supported values: %s" % supported
 
 if __name__ == '__main__':
 
     parser = optparse.OptionParser(usage="Usage: %prog [options] FILE.yaml")
     parser.add_option("-t", "--target", dest="target", default="",
-                      help="Target platform to generate for", metavar="TARGET")
+                      help=target_help_string(), metavar="TARGET")
     parser.add_option("-o", "--output-directory", dest="output_dir", default="./",
                       help="Directory to output generated files to", metavar="DIR")
     parser.add_option("", "--help-input", action="store_true",
