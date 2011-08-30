@@ -2,7 +2,7 @@
 
 import sys, optparse
 
-from deploymentkit import core, archlinux
+from deploymentkit import core
 
 if __name__ == '__main__':
 
@@ -11,14 +11,21 @@ if __name__ == '__main__':
                       help="Target platform to generate for", metavar="TARGET")
     parser.add_option("-o", "--output-directory", dest="output_dir", default="./",
                       help="Directory to output generated files to", metavar="DIR")
+    parser.add_option("", "--help-input", action="store_true",
+                      help="Show help about input file format")
 
     (options, args) = parser.parse_args()
 
-    if len(args) < 1:
-        parser.error("No input file specified")
-    elif len(args) > 1:
-        parser.error("Too many arguments")
+    if options.help_input:
+        parser.print_usage()
+        print core.PackageMetadata.__doc__
 
-    input_file = args[0]
+    else:
+        if len(args) < 1:
+            parser.error("No input file specified")
+        elif len(args) > 1:
+            parser.error("Too many arguments")
 
-    core.generate_recipe(input_file, options.output_dir, options.target)
+        input_file = args[0]
+
+        core.generate_recipe(input_file, options.output_dir, options.target)
