@@ -31,11 +31,77 @@ Dependencies are specified using for instance:
 - executable
 """
 
+def format_defaults(format_definition):
+    defaults = {}
 
-# FIXME: Formalize supported values
-# TODO: some more could probably be optional?
-# TODO: define a sorting order (for use in the documentation)
-metadata_format = {
+    for attribute, definition in format_definition.items():
+        mandatory, value_type, default_value, description, example_value = definition
+
+        defaults[attribute] = default_value
+
+    return defaults
+
+def format_mandatory_attributes(format_definition):
+    attributes = []
+
+    for attribute, definition in format_definition.items():
+        mandatory, value_type, default_value, description, example_value = definition
+
+        if mandatory:
+            attributes.append(attribute)
+
+    return attributes
+
+def format_optional_attributes(format_definition):
+    attributes = []
+
+    for attribute, definition in format_definition.items():
+        mandatory, value_type, default_value, description, example_value = definition
+
+        if not mandatory:
+            attributes.append(attribute)
+
+    return attributes
+
+def format_example(format_definition):
+    example = {}
+    for key, value in format_definition.items():
+        example[key] = format_definition[key][-1]
+    return example
+
+def format_documentation(format_definition):
+    # Literal documentation
+    metadata_documentation = ''
+    doc_lines = []
+    def doc_attribute_str(attribute):
+       mandatory, value_type, default_value, description, example = format_definition[attribute]
+       return '\t%s (%s): %s' % (attribute, value_type, description)
+
+    # Header
+    doc_lines.append("The package metadata format used by DeploymentKit is based on YAML.")
+    doc_lines.append("")
+    doc_lines.append("")
+
+    # Mandatory attributes
+    doc_lines.append('The following attributes are mandatory:')
+    for attribute in format_mandatory_attributes(format_definition):
+        doc_lines.append(doc_attribute_str(attribute))
+
+    # Optional attributes
+    doc_lines.append("")
+    doc_lines.append('The following attributes are optional:')
+    for attribute in format_optional_attributes(format_definition):
+        doc_lines.append(doc_attribute_str(attribute))
+
+    metadata_documentation = '\n'.join(doc_lines)
+
+    # Example
+    metadata_documentation += "\n\nExample:\n\n"
+    metadata_documentation += yaml.dump(format_example(format_definition))
+
+    return metadata_documentation
+
+format_definition = {
     # 'Attribute': (mandatory, value_type, default_value,
     #           description, example_value)
     'Name': (True, 'string', '',
@@ -76,65 +142,31 @@ metadata_format = {
             ["pkg-config:glib-2.0","executable:gcc"]),
 }
 
-# Generated from above definition
-mandatory_attributes = [] # actually a set, see below
-optional_attributes = [] # actually a set, see below
-default_metadata = {}
-for attribute, definition in metadata_format.items():
-    mandatory, value_type, default_value, description, example_value = definition
+class PackageMetadata(object):
+    # FIXME: Formalize supported values
+    # TODO: some more could probably be optional?
+    # TODO: define a sorting order (for use in the documentation)
 
-    default_metadata[attribute] = default_value
+    definition = format_definition
+    default = format_defaults(format_definition)
+    example = format_example(format_definition)
 
-    if mandatory:
-        mandatory_attributes.append(attribute)
-    else:
-        optional_attributes.append(attribute)
+    __doc__ = format_documentation(format_definition)
 
-# Disjunct sets
-mandatory_attributes = set(mandatory_attributes)
-optional_attributes = set(optional_attributes)
-
-# Literal documentation
-metadata_documentation = ''
-doc_lines = []
-def doc_attribute_str(attribute):
-   mandatory, value_type, default_value, description, example = metadata_format[attribute]
-   return '\t%s (%s): %s' % (attribute, value_type, description)
-
-# Header
-doc_lines.append("The package metadata format used by DeploymentKit is based on YAML.")
-doc_lines.append("")
-doc_lines.append("")
-# Mandatory attributes
-doc_lines.append('The following attributes are mandatory:')
-for attribute in mandatory_attributes:
-    doc_lines.append(doc_attribute_str(attribute))
-
-# Optional attributes
-doc_lines.append("")
-doc_lines.append('The following attributes are optional:')
-for attribute in optional_attributes:
-    doc_lines.append(doc_attribute_str(attribute))
-
-metadata_documentation = '\n'.join(doc_lines)
-
-example = {}
-for key, value in metadata_format.items():
-    example[key] = metadata_format[key][-1]
-
-metadata_documentation += "\n\nExample:\n\n"
-metadata_documentation += yaml.dump(example)
+    # Disjunct sets
+    mandatory_attributes = set(format_mandatory_attributes(format_definition))
+    optional_attributes = set(format_optional_attributes(format_definition))
 
 
 class PackageRecipe(object):
     """ """
 
     def __init__(self):
-        self._data = dict(default_metadata)
+        self._data = dict(PackageMetadata.default)
 
     def load(self, mapping):
         """Load the metadata from @mapping."""
-        self._data = dict(default_metadata)
+        self._data = dict(PackageMetadata.default)
         self._data.update(mapping)
 
     def load_from_string(self, string):
