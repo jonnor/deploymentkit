@@ -59,53 +59,5 @@ Debian/Ubuntu       debian/             .deb
 Fedora/openSUSE     .spec               .rpm
 Windows             NSIS script         .exe/.msi
 
-= TODO =
-See also the numerous FIXME, TODO and XXX comments in the source code.
-
-== 0.1.0 release ==
-Criteria:
-    Can build simple package recipes for common GNU/Linux targets
-        Ubuntu/Fedora/ArchLinux
-    Name has been decided?
-
-== In DeploymentKit ==
-* Extend existing target support
- * Resolve non-installed dependencies
- * Multiple (sub/binary) packages
- * Post/Pre Install/Uninstall script support
-
-* New build system support
- * qmake
- * python distutils
- * cmake
- * scons
-
-* New target support
- * Fedora
- * RHEL/CentOS
- * Debian
- * Ubuntu
- * Mandriva
- * Gentoo
- * other GNU/Linux...
-
- * Windows mingw32 (MSI/NSIS)
- * Mac OSX (macports/fink/dmg/app bundle)
-
- * BSDs et.c.
-
-* Support for packages bundling for GNU/Linux targets
-
-* Testing
- * Set up CI system with integration tests
-
-== In related projects ==
-PackageKit:
-    * Method of querying package for executables
-    * Method of querying package for pkg-config identifiers
-
-Open Build Service:
-    * Arch Linux support (2011 OpenSUSE GSOC)
-    * Support for running DeploymentKit
-    to generate the target recipes
-
+= More documentation =
+See TODO.txt and the doc/ directory
