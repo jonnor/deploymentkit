@@ -4,8 +4,6 @@ import tarfile, subprocess, os
 from Cheetah.Template import Template
 import yaml
 
-from deploymentkit.core import core
-
 
 def generate_recipe(metadata):
     # FIXME: support package.install files

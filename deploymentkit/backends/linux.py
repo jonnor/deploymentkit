@@ -1,7 +1,7 @@
 
 """Common code for Linux or Linux-like systems."""
 
-from deploymentkit.core import core
+from deploymentkit.core import target
 from deploymentkit.backends import archlinux, rpm
 
 import tarfile, subprocess, os
@@ -18,14 +18,14 @@ installed_file_to_package_mappers = {
     # 'Fedora': rpm.map_installed_file_to_package,
 }
 
-class Linux(core.TargetPlatform):
+class Linux(target.TargetPlatform):
     def __init__(self, distro):
-        core.TargetPlatform.__init__(self)
+        target.TargetPlatform.__init__(self)
 
         self._distro = distro
 
     def generate_recipe(self, pkg_recipe):
-        core.TargetPlatform.generate_recipe(self, pkg_recipe)
+        target.TargetPlatform.generate_recipe(self, pkg_recipe)
         """ """
 
         # Map target independent values into target specific values.

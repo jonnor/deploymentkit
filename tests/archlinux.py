@@ -1,7 +1,7 @@
 import unittest, os
 
 import deploymentkit
-from deploymentkit.core import core
+from deploymentkit.core import recipe
 from deploymentkit.backends import linux, archlinux
 
 import utils
@@ -48,7 +48,7 @@ input_metadata = {
 class TestPkgbuildGeneration(unittest.TestCase):
 
     def setUp(self):
-        pkg = core.PackageRecipe()
+        pkg = recipe.PackageRecipe()
 
         pkg.load(input_metadata)
         target = linux.Linux('ArchLinux')

@@ -3,7 +3,7 @@
 import sys, optparse
 
 import deploymentkit
-from deploymentkit import core
+from deploymentkit.core import recipe, target
 
 def target_help_string():
     supported = ' '.join(deploymentkit.supported_targets.keys())
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     if options.help_input:
         parser.print_usage()
-        print core.PackageMetadata.__doc__
+        print recipe.PackageMetadata.__doc__
 
     else:
         if len(args) < 1:
@@ -33,4 +33,4 @@ if __name__ == '__main__':
 
         input_file = args[0]
 
-        core.generate_recipe(input_file, options.output_dir, options.target)
+        target.generate_recipe(input_file, options.output_dir, options.target)
