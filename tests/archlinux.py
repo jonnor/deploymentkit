@@ -4,17 +4,14 @@ import deploymentkit
 from deploymentkit.core import core
 from deploymentkit.backends import linux, archlinux
 
-pkgbuild_attribute = archlinux.pkgbuild_attribute
+import utils
 
-# FIXME: make lookup independent of current working directory
-def get_testdata_file(basename):
-    path = os.path.join('tests/data', basename)
-    return path
+pkgbuild_attribute = archlinux.pkgbuild_attribute
 
 class TestParsePkgbuild(unittest.TestCase):
     
     def setUp(self):
-        self.file = open(get_testdata_file('PKGBUILD'))
+        self.file = open(utils.get_testdata_file('PKGBUILD'))
         self.str = self.file.read()
 
     def test_pkgname(self):
