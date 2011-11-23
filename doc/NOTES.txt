@@ -1,0 +1,295 @@
+
+Ideal application deployment story:
+    Author writes the software using his favorite language, toolkit, libraries, IDE and build system.
+    When author wants to release the software to the user, only a single action is needed, no matter what the users platform is
+    The user can then install with a single action
+
+    Updates are automatically managed in a consistent fashion, and can be updated
+
+Focus:
+non-system, applications, GNU/Linux, Free software,
+Does it matter to users that we "focus on" free software??
+
+- GNU/Linux: the primary Free Software platform, and out of convenience 
+- Applications and non-system: low barriers are very important, user impact high, typically simple compared to system packages
+- Free software: The authors primary motivation is to improve the state of free and open source software
+
+Scope:
+All operating systems very welcome as targets
+Welcome to use in non-free software - NOTE: LICENSING IMPLICATIONS, needs to be liberal
+As it matures, might target also libraries, system modules
+
+Roadmap:
+    0.0.1 - Self hosted, can build package for Arch
+
+    0.1.0 - minimally useful state, first public announcement
+    Can generate Arch, Fedora, Ubuntu package metadata for simple gtk,c,autotools project
+    Name has been decided upon
+
+    0.2.0 - 
+
+Existing work:
+
+    Generators
+        Quickly - deb generation
+        rpmdev-newspec ?
+        autospec
+        spectacle
+
+        specfile.spec.in in GNOME ?
+        other template based approaches
+
+        http://mud-builder.garage.maemo.org/
+
+    Converters
+        Tazarch
+
+    Parsers|
+        Parse::RPM::Spec
+        RPM::Toolbox::Spec
+        rpmspecparser
+        https://bugzilla.redhat.com/show_bug.cgi?id=441808
+
+        http://www.pubbs.net/201005/archlinux/14147-arch-general-pkgbuild-parser.html
+        https://bbs.archlinux.org/viewtopic.php?id=52506
+        http://www.mail-archive.com/pacman-dev@archlinux.org/msg03418.html
+        http://xyne.archlinux.ca/ideas/pkgmeta
+
+        Parse::Debian::PackageDesc
+
+    Related
+        checkinstall ?
+        https://bbs.archlinux.org/viewtopic.php?pid=147121
+
+Relevant projects:
+    PackageKit
+    spectacle
+    OBS
+
+    Distributions: Arch, 
+    Applications
+    Meta-projects: GNOME, KDE
+
+Reuse:
+    spectacle? 
+    - Probably a lot of good ideas, ofc reuse them
+    - Can generate spec files from python state/yaml file
+    - has a well-defined file format. 
+    - However, it is spec/rpm specific...
+    - Licensed GPL, cannot be used directly from non-GPL compatible projects
+
+Components required
+    for 0.1    
+
+    build-system integration
+        distutils
+        autotools
+
+    recipe generator
+        PKGBUILD
+        spec (using spectacle?)
+        debian/ 
+
+    documentation
+
+
+Relevant people:
+    David King - help with autotools integration?
+    Richard Hugsie - how does it fit with packagekit? any integration points, overlaps, dependencies?
+
+Implementation:
+    Ideally there would be C interfaces for everything that should have public API... This might not be worth it though
+    Use Python for scripts/tools that do not need public API, and maybe for proof-of-concept impl.
+
+    buildrecipe set-project project-name "Project Name" http://www.myproject.com
+    buildrecipe set-version 0.10
+
+    buildsystem-type autotools|qmake|distutils
+    Do we want to have an extension point for this, so people can add custom project types?
+
+    buildrecipe add-dependency executable:someprogram
+    buildrecipe add-dependency pkg-config:gtk+2.0 2.20
+
+Usage model:
+    just using:
+
+    make package-dist (or similar) -> creates package recipe for all supported platforms/distros
+    Should be ready to build with native tools or OBS
+
+    in configure.ac/Makefile.am:
+
+    make package (or similar) -> create binary packages for this system
+
+    Maybe one should use a DeploymentKit binary to do these actions instead?
+    And perhaps the package recipe generation should happen on the target platform (for now)?
+
+    setup:
+    configure.ac/Makefile.am -> give deploymentkit the neccesary metadata
+    
+
+Packaging in general
+    Original source code
+    Patches
+    Build systems
+        autotools, cmake, qmake, scons, waf, 
+
+    Package recipe
+        .spec, PKGBUILD, debian/, ebuild
+        Mostly metadata
+        Source of most of the data that is produced
+        Today essentially manually written and modified by package maintainers
+        Much of the data/metadata is also available in the build system used
+        by the original source code: name, vesion, dependencies, type of files/targets, 
+
+        Role: specifies what to build, how to build it
+    Source package
+        .srpm, src.tar.*, 
+        Original source code, package recipe, patches
+
+        Role: Brings together all the data needed to compile/recompile the binary package(s)
+    Binary package
+        .rpm, .deb, pkg.tar.*
+        Built from source package
+        Several binary packages are often built from a single source package
+        Debug symbols, Development files, Documentation, Translations
+        (tests, libraries, optional components, plugins)
+
+        Data: files to be installed, in some sort of archive
+        Metadata: name, version, dependencies, <- comes from package recipe, mostly
+        Role: distributed to end user to be installed
+    Repository
+        Debian/Ubuntu format
+        Arch format
+        Fedora/Mandriva/openSUSE (do they use the same?? Don't think so)
+
+        binary repository: Collection of binary packages
+        source repository: Collection of source packages
+
+        Role: 
+
+
+    For distribution D, what package should be used for dependency X?
+    pkg-config gtk+2.0 -> ?
+    python, perl, ruby module X -> ?
+    some-executable -> ?
+
+    How to solve this? Ideally there would be a exist a mapping per D, maintained by distributions,
+    that contained this data
+    This should be possible to mostly generate, based on some heuteristics and conventions
+    Generation requires information about the file contents of every binary package in the repos
+
+    ArchLinux: can use the data pkgfile uses?
+    Debian/Ubuntu: can use the data packages.debian.org/packages.ubuntu.com uses?
+    Fedora: can use the data https://admin.fedoraproject.org/pkgdb uses?
+    SUSE: ?
+    
+    What distributions has dependency X, version Y available?
+    Usecase: deciding wether to bump a dependency or not, knowing who can use your software and not
+    There should be distro-independent data available about which binary packages exist in their repos
+
+
+Package generation
+    IDEs and build systems should be able to generate packages recipe 
+    from the metadata they already have
+    
+    Library for generating the package build metadata
+        can then be hooked into by IDEs and build systems
+
+    Just being able to generate an initial template will be minimally useful
+
+    Other common workflows:
+        Bump version number, adjust dependencies
+        Add patches - outofscope?
+
+    Scope: Initially, making application developers lives easier
+        
+    Package formats:
+        Fedora/SUSE/Mandriva
+        Debian/Ubuntu
+        Arch
+        Gentoo
+
+        Slackware, Puppy, Angstrom, 
+
+    Challenges:
+        git or other scm packages? should not be a problem, 
+
+Cross-distribution packaging
+    Mapping of different package names
+        Base on the conventions used, keep a manual list for the rest
+        
+    Universal format?
+    Conversion between the different formats?
+    API/library for accessing this datas
+
+Distribution repository metadata
+    Unified API for all distributions
+    Mainly an online API, but should also be possible to use offline
+    List of all packages, with versions et.c.
+    Notifications of package updates/changes
+    
+    Existing work:
+        Linux Standard Base actually has a tool/db
+
+OpenSUSE Build Service
+    Arch Linux target support
+        Add support to "build"
+            http://lists.opensuse.org/opensuse-buildservice/2010-07/msg00281.html
+            build and init_buildsystem script: Generating a base-system
+            Build.pm: Read pkg.tar.* metadata
+            Build.pm: Read PKGBUILD metadata
+        Add support to "build service"
+            Publish to Arch Linux repo
+        Package pacman/makepkg for OpenSUSE, et.c.
+        Challenges:
+            Tracking changes in rolling-release distros
+            
+    Performance
+        Use LXC based virtualization instead of Xen
+        Use a permanent read-only base filesystem, 
+            with an overlay that is private to each build
+
+
+Related ideas
+    GNOME application development platform
+    Windows FOSS distro
+    Distributed bugtracking
+    Build system improvements - the existing ones kinda suck
+    jhbuild improvements
+        Build (distribution) packages directly?
+        Read dependencies from distro, and use when appropriate
+
+
+Hosting service
+    Complete end-to-end service for FOSS application development
+
+    source control
+    bugtracking
+    mailing-list
+    forums
+    website
+    wiki
+    build system, repositories
+
+== Challenges ==
+- Different package names in different GNU/Linux distros
+    - Database with the mappings
+    - Automatically generate most of them based on the conventions used
+    - Quirks can be done as overrides
+    - Should be available online and locally
+- Prese
+
+- Common API for all type of package format targets
+
+
+== Process / Functional elements ==
+Build system metadata (autotools, cmake, anjuta-project, scons, python distutils)
+- Build system input module
+Internal metadata format
+- Package format output module
+Packaging-format metadata (.spec, debian control, )
+
+- Packaging system module (OBS, Ubuntu PPA)
+Binary Package (.deb, .rpm, .msi, .exe, .pkg.zx, .dmg)
+
+==  ==
