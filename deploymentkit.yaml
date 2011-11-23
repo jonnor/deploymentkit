@@ -1,0 +1,15 @@
+Name: DeploymentKit
+URL: http://github.com/jonnor/deploymentkit
+Version: "0.0.1"
+ReleaseVersion: "0"
+Licenses: [LGPLv2+]
+BriefDescription: Making deployment of native packages easy
+Description: DeploymentKit allows native packages for multiple 
+             target platforms to be generated from a single
+             package recipe
+Sources: ["./"]
+BuildSystemType: distutils
+ProjectType: python2-library
+Dependencies: ["python2:pyyaml", "python2:Cheetah"]
+BuildDependencies: [""]
+Changelog: ""
