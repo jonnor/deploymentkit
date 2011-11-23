@@ -18,6 +18,10 @@ installed_file_to_package_mappers = {
     # 'Fedora': rpm.map_installed_file_to_package,
 }
 
+# FIXME: remove public inheritance of TargetPlatform,
+# make generic Linux functionality available as helper classes/function
+# What we want to share here is the implementation code,
+# which is better done through composition
 class Linux(target.TargetPlatform):
     def __init__(self, distro):
         target.TargetPlatform.__init__(self)

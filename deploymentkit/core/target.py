@@ -2,8 +2,9 @@
 
 """
 
-# TODO: Use same platform identifiers as PackageKit? Or OBS?
-supported_platforms = {}
+# FIXME: Target-specific recipies are not only dependent on platform
+# but also the build type and toolchain used.
+# FIXME: Require target backends to specify supported targets and the build types
 
 class TargetPlatform(object):
     """Interface class for a target platform."""

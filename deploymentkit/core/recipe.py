@@ -145,6 +145,7 @@ format_definition = {
 class PackageMetadata(object):
     # FIXME: Formalize supported values
     # TODO: some more could probably be optional?
+    # TODO: define default value for optional attributes
     # TODO: define a sorting order (for use in the documentation)
 
     definition = format_definition
@@ -166,6 +167,10 @@ class PackageRecipe(object):
 
     def load(self, mapping):
         """Load the metadata from @mapping."""
+
+        # TODO: warn on unknown input attributes
+        # TODO: verify types of input attributes
+
         self._data = dict(PackageMetadata.default)
         self._data.update(mapping)
 
