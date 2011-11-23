@@ -1,5 +1,5 @@
 
-from deploymentkit import linux
+from deploymentkit.backends import linux
 
 # {Targetid: core.TargetPlatform instance}
 supported_targets = {}

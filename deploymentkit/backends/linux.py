@@ -1,7 +1,8 @@
 
 """Common code for Linux or Linux-like systems."""
 
-from deploymentkit import archlinux, rpm, core
+from deploymentkit.core import core
+from deploymentkit.backends import archlinux, rpm
 
 import tarfile, subprocess, os
 

@@ -1,6 +1,8 @@
 import unittest, os
 
-from deploymentkit import linux, archlinux, core
+import deploymentkit
+from deploymentkit.core import core
+from deploymentkit.backends import linux, archlinux
 
 pkgbuild_attribute = archlinux.pkgbuild_attribute
 

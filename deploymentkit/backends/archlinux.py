@@ -4,7 +4,7 @@ import tarfile, subprocess, os
 from Cheetah.Template import Template
 import yaml
 
-from deploymentkit import core
+from deploymentkit.core import core
 
 
 def generate_recipe(metadata):
