@@ -1,7 +1,7 @@
 import unittest, os
 
 import deploymentkit
-from deploymentkit.core import recipe
+from deploymentkit.core import recipe, target, generator
 from deploymentkit.backends import linux, archlinux
 
 import utils
@@ -9,6 +9,7 @@ import utils
 pkgbuild_attribute = archlinux.pkgbuild_attribute
 
 class TestParsePkgbuild(unittest.TestCase):
+    """Test that the PKGBUILD parser used for testing works."""
     
     def setUp(self):
         self.file = open(utils.get_testdata_file('PKGBUILD'))
@@ -46,15 +47,18 @@ input_metadata = {
 }
 
 class TestPkgbuildGeneration(unittest.TestCase):
+    """Test PKGBUILD generation from reference input data."""
 
     def setUp(self):
-        pkg = recipe.PackageRecipe()
+        rec = recipe.PackageRecipe()
+        rec.load(input_metadata)
+        
+        tar = target.Target('gnulinux-archlinux-current-i686')
+        
+        gen = generator.Generator()
+        output = gen.generate_target_recipe(rec, tar)
 
-        pkg.load(input_metadata)
-        target = linux.Linux('ArchLinux')
-        output = target.generate_recipe(pkg)
-
-        self.str = output['PKGBUILD']
+        self.str = output.files()['PKGBUILD']
 
     def test_pkgname(self):
         self.assertEqual(pkgbuild_attribute(self.str, 'pkgname'), 'testpackage')
