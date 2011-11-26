@@ -8,27 +8,38 @@ from deploymentkit.core.generator import Generator
 from deploymentkit.core.target import Target
 from deploymentkit.core.recipe import PackageRecipe, TargetRecipe, PackageMetadata
 
-def target_help_string():
+def help_target_string():
     supported = Generator.supported_targets()
     supported_str = ", ".join([str(i) for i in supported])
-    return "Target platform to generate for. Supported values: %s" % supported_str
+    return "Supported target platforms:\n%s" % supported_str
 
+def help_input_string():
+    return PackageMetadata.__doc__
 
 if __name__ == '__main__':
 
     parser = optparse.OptionParser(usage="Usage: %prog [options] FILE.yaml")
     parser.add_option("-t", "--target", dest="target", default="",
-                      help=target_help_string(), metavar="TARGET")
+                      help="The target to generate package recipe for. See --help-target for details", metavar="TARGET")
     parser.add_option("-o", "--output-directory", dest="output_dir", default="./",
                       help="Directory to output generated files to", metavar="DIR")
+
     parser.add_option("", "--help-input", action="store_true",
                       help="Show help about input file format")
+    parser.add_option("", "--help-target", action="store_true",
+                      help="Show help about the supported targets")
 
     (options, args) = parser.parse_args()
 
-    if options.help_input:
+    if options.help_input or options.help_target:
+
         parser.print_usage()
-        print PackageMetadata.__doc__
+
+        if options.help_input:
+            print help_input_string()
+
+        if options.help_target:
+            print help_target_string()
 
     else:
         if len(args) < 1:
