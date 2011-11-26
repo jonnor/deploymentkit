@@ -3,11 +3,16 @@
 import sys, optparse
 
 import deploymentkit
-from deploymentkit.core import recipe, target
+import deploymentkit.core
+from deploymentkit.core.generator import Generator
+from deploymentkit.core.target import Target
+from deploymentkit.core.recipe import PackageRecipe, TargetRecipe, PackageMetadata
 
 def target_help_string():
-    supported = ' '.join(deploymentkit.supported_targets.keys())
-    return "Target platform to generate for. Supported values: %s" % supported
+    supported = Generator.supported_targets()
+    supported_str = ", ".join([str(i) for i in supported])
+    return "Target platform to generate for. Supported values: %s" % supported_str
+
 
 if __name__ == '__main__':
 
@@ -23,7 +28,7 @@ if __name__ == '__main__':
 
     if options.help_input:
         parser.print_usage()
-        print recipe.PackageMetadata.__doc__
+        print PackageMetadata.__doc__
 
     else:
         if len(args) < 1:
@@ -32,5 +37,19 @@ if __name__ == '__main__':
             parser.error("Too many arguments")
 
         input_file = args[0]
+        
+        generic_recipe = PackageRecipe()
+        generic_recipe.load_from_file(input_file)
+        
+        target = Target()
+        if options.target:
+            target.from_string(options.target)
+        else:
+            # FIXME: unhardcode, move into target
+            # Introduce a way of getting the default target automatically
+            target.from_string("gnulinux-archlinux-current-x86_64")
 
-        target.generate_recipe(input_file, options.output_dir, options.target)
+        generator = Generator()
+        target_recipe = generator.generate_target_recipe(generic_recipe, target)
+        target_recipe.write_to_directory(options.output_dir)
+

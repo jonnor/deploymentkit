@@ -1,10 +1,37 @@
 
 """Common code for Linux or Linux-like systems."""
 
-from deploymentkit.core import target
+from deploymentkit.core import target, recipe
 from deploymentkit.backends import archlinux, rpm
 
 import tarfile, subprocess, os
+
+class LinuxTargetRecipe(recipe.TargetRecipe):
+    
+    def files(self):
+        return self._files
+
+class GeneratorBackend(object):
+
+    supported_targets = [
+        target.Target("gnulinux-archlinux-current-x86_64"),
+        target.Target("gnulinux-archlinux-current-i686"),
+    ]
+
+    def __init__(self):
+        pass
+        
+    def generate_target_recipe(self, generic_recipe, target):
+    
+        assert target in self.supported_targets
+    
+        linux_backend = Linux('ArchLinux')
+        files = linux_backend.generate_recipe(generic_recipe)
+        
+        output = LinuxTargetRecipe()
+        output._files = files
+        
+        return output
 
 recipe_generators = {
     'ArchLinux': archlinux.generate_recipe,
@@ -22,14 +49,12 @@ installed_file_to_package_mappers = {
 # make generic Linux functionality available as helper classes/function
 # What we want to share here is the implementation code,
 # which is better done through composition
-class Linux(target.TargetPlatform):
+class Linux():
     def __init__(self, distro):
-        target.TargetPlatform.__init__(self)
 
         self._distro = distro
 
     def generate_recipe(self, pkg_recipe):
-        target.TargetPlatform.generate_recipe(self, pkg_recipe)
         """ """
 
         # Map target independent values into target specific values.
@@ -58,7 +83,7 @@ def generic_to_specific_recipe(target, generic_data):
 
     # Add build steps
     if generic_data['BuildSystemType'] != 'autotools':
-                # TODO: support other things than autotools
+        # TODO: support other things than autotools
         raise NotImplementedError
 
     if target == 'ArchLinux':

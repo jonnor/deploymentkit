@@ -2,38 +2,55 @@
 
 """
 
-# FIXME: Target-specific recipies are not only dependent on platform
-# but also the build type and toolchain used.
-# FIXME: Require target backends to specify supported targets and the build types
-
-class TargetPlatform(object):
-    """Interface class for a target platform."""
-
-    def __init__(self):
-        pass
-
-    def generate_recipe(self, pkg_recipe):
-        """Generate a target specific package recipe from the generic @pkg_recipe
-        To be implemented by a specific target platform."""
-        pass
-
-
-def generate_recipe(input_file, output_prefix, target_id):
-        """Generate the target-specific package recipie from
-        the YAML @input_file, and write the files to the path @output_prefix."""
-
-        pkg = PackageRecipe()
-        pkg.load_from_string(open(input_file).read())
-
-        if target_id:
-            target = deploymentkit.supported_targets[target_id]
+class Target(object):
+    """Identifes a target (platform).
+    
+    Currently a target must be fully specified. In the future,
+    it should be possible to leave some fields blank."""
+    
+    # TODO: validate architecture field
+    
+    _instance_map = {}
+    
+    def __init__(self, identifier_string=None):
+        self._family = ''
+        self._series = ''
+        self._version = ''
+        self._architecture = ''
+        
+        if identifier_string is not None:
+            self.from_string(identifier_string)
+        
+    def from_string(self, identifier_string):
+        """
+        Set the target from a identifier string on form
+        Format: family-series-version-architecture
+        """
+        
+        try:
+            family, series, version, arch = identifier_string.split('-')
+        except IndexError:
+            raise ValueError, 'Invalid target identifier string: %s' % identifier_string
         else:
-            target = None # Autodetect
-        output_files = pkg.output_target_recipe(target)
+            self._family = family
+            self._series = series
+            self._version = version
+            self._architecture = arch
 
-        for filename, file_content in output_files.items():
-                if not os.path.exists(output_prefix):
-                    os.makedirs(output_prefix)
-                f = open(os.path.join(output_prefix, filename), 'w')
-                f.write(file_content)
-                f.close()
+    def to_string(self):
+        fields = [self._family, self._series, self._version, self._architecture]
+        return '-'.join(fields)
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return self.to_string()
+        
+    def __repr__(self):
+        return '%s(%s)' % ('Target', self.to_string())
+
+

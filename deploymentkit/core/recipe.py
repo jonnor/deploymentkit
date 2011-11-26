@@ -143,6 +143,9 @@ format_definition = {
 }
 
 class PackageMetadata(object):
+    
+    # TODO: Rename to GenericRecipeFormat
+    
     # FIXME: Formalize supported values
     # TODO: some more could probably be optional?
     # TODO: define default value for optional attributes
@@ -162,6 +165,8 @@ class PackageMetadata(object):
 class PackageRecipe(object):
     """ """
 
+    # TODO: rename to GenericRecipe
+
     def __init__(self):
         self._data = dict(PackageMetadata.default)
 
@@ -179,18 +184,32 @@ class PackageRecipe(object):
         mapping = yaml.load(string)
         self.load(mapping)
 
+    def load_from_file(self, filepath):
+        file_contents = open(filepath).read()
+        self.load_from_string(file_contents)
+
     def get_data(self):
         # Return copy so that it cannot be mutated by others
         return dict(self._data)
     data = property(get_data)
 
-    def output_target_recipe(self, target_platform=None):
-        """Generate the target-specific recipe.
-        Returns a mapping {"filename": "content"}"""
 
-        if not target_platform:
-            # TODO: option to autodetect the current platform
-            target_platform = deploymentkit.supported_targets['ArchLinux']
+class TargetRecipe(object):
+    """Target specific recipe."""
+    
+    def __init__(self):
+        pass
 
-        return target_platform.generate_recipe(self)
+    def files(self):
+        pass
 
+    def write_to_directory(self, path):
+        output_prefix = path
+        output_files = self.files()
+
+        for filename, file_content in output_files.items():
+            if not os.path.exists(output_prefix):
+                os.makedirs(output_prefix)
+            f = open(os.path.join(output_prefix, filename), 'w')
+            f.write(file_content)
+            f.close()
