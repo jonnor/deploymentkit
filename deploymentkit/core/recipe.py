@@ -35,9 +35,10 @@ def format_defaults(format_definition):
     defaults = {}
 
     for attribute, definition in format_definition.items():
-        mandatory, value_type, default_value, description, example_value = definition
+        mandatory, value_type, default_value, description, example_value, supported = definition
 
-        defaults[attribute] = default_value
+        if not default_value is None:
+            defaults[attribute] = default_value
 
     return defaults
 
@@ -45,7 +46,7 @@ def format_mandatory_attributes(format_definition):
     attributes = []
 
     for attribute, definition in format_definition.items():
-        mandatory, value_type, default_value, description, example_value = definition
+        mandatory, value_type, default_value, description, example_value, supported = definition
 
         if mandatory:
             attributes.append(attribute)
@@ -56,10 +57,18 @@ def format_optional_attributes(format_definition):
     attributes = []
 
     for attribute, definition in format_definition.items():
-        mandatory, value_type, default_value, description, example_value = definition
+        mandatory, value_type, default_value, description, example_value, supported = definition
 
         if not mandatory:
             attributes.append(attribute)
+
+    return attributes
+
+def format_attributes(format_definition):
+    attributes = []
+
+    for attribute, definition in format_definition.items():
+        attributes.append(attribute)
 
     return attributes
 
@@ -74,7 +83,7 @@ def format_documentation(format_definition):
     metadata_documentation = ''
     doc_lines = []
     def doc_attribute_str(attribute):
-       mandatory, value_type, default_value, description, example = format_definition[attribute]
+       mandatory, value_type, default_value, description, example, supported = format_definition[attribute]
        return '\t%s (%s): %s' % (attribute, value_type, description)
 
     # Header
@@ -101,51 +110,215 @@ def format_documentation(format_definition):
 
     return metadata_documentation
 
+def list_of_dependencies(attribute_value):
+    """ """
+
+    supported_types = ["pkg-config", "executable"]
+
+    explanation = "Each dependency must be on form \"type:identifier\", where type is one of: %s" % str(supported_types)
+
+    for dep in attribute_value:
+        type, identifier = dep.split(":")
+        if not type in supported_types:
+            return (False, explanation)
+
+    return (True, explanation)
+
+def list_of_any_strings(attribute_value):
+    """ """
+
+    e = "List of any string values accepted."
+
+    for string in attribute_value:
+        valid, ignore = any_string(string)
+        if not valid:
+            return (False, e)
+
+    return (True, e)
+
+def any_string(attribute_value):
+    """ """
+
+    # TODO: actually validate that it is a string
+
+    explanation = "Any string value accepted."
+
+    return (True, explanation)
+
+def supported_buildsystem(attribute_value):
+    """ """
+
+     # Union of all supported build systems from backends
+    supported = ['autotools', 'distutils']
+
+    explanation = "Must be one of: %s" % str(supported)
+
+    if attribute_value in supported:
+        return (True, explanation)
+    else:
+        return (False, explanation)
+
 format_definition = {
     # 'Attribute': (mandatory, value_type, default_value,
-    #           description, example_value)
-    'Name': (True, 'string', '',
-            'Name of the software', 'foo'),
+    #           description, example_value,
+    #           supported_func
+    #           )
+    #
+    # supported_func: Function recieves the value of the attribute
+    # and returns a tuple: a boolean to indicate validity,
+    # and a string describing what is valid / not valid.
+    'Name': (True, 'string', None,
+            'Name of the software', 'foo',
+            any_string
+            ),
 
-    'Version': (True, 'string', '0',
-            'Version of the software', '1.0.0'),
+    'Version': (True, 'string', None,
+            'Version of the software', '1.0.0',
+            any_string
+            ),
 
     'ReleaseVersion': (True, 'string', '0',
-            'Version of the package', '1'),
+            'Version of the package', '1',
+            any_string
+            ),
 
-    'BriefDescription': (True, 'string', '',
+    'BriefDescription': (True, 'string', None,
             'Short description of the software',
-            'foo is a well known example software'),
+            'foo is a well known example software',
+            any_string
+            ),
 
     'Description': (False, 'string', '',
             'Longer description of the software',
-            'foos amazing capabilities and qualities has led it to become ubiquitous'),
+            'foos amazing capabilities and qualities has led it to become ubiquitous',
+            any_string
+            ),
 
-    'URL': (True, 'string', 'http://example.org',
+    'URL': (True, 'string', None,
             'The homepage of the software',
-            'http://www.example.org/foo'),
+            'http://www.example.org/foo',
+            any_string
+            ),
 
-    'BuildSystemType': (True, 'string', [],
-            'The build system used. Supported: autotools',
-            'autotools'),
+    'BuildSystemType': (True, 'string', None,
+            'The build system used.', 'autotools',
+            supported_buildsystem
+            ),
 
-    'Licenses': (True, 'list-of-strings', [],
-            'The licenses this software is under',
-            'GPL'),
+    'Licenses': (True, 'list-of-strings', None,
+            'The licenses this software is under', 'GPL',
+            list_of_any_strings
+            ),
 
-    'Dependencies': (True, 'list-of-strings', [],
+    'Dependencies': (True, 'list-of-strings', None,
             'The runtime dependencies of this software',
-            ["pkg-config:glib-2.0","executable:gcc"]),
+            ["pkg-config:glib-2.0","executable:gcc"],
+            list_of_dependencies
+            ),
 
-    'BuildDependencies': (True, 'list-of-strings', [],
+    'BuildDependencies': (True, 'list-of-strings', None,
             'The runtime dependencies of this software',
-            ["pkg-config:glib-2.0","executable:gcc"]),
+            ["pkg-config:glib-2.0","executable:gcc"],
+            list_of_dependencies
+            ),
 }
 
-class PackageMetadata(object):
-    
-    # TODO: Rename to GenericRecipeFormat
-    
+
+class RecipeVerificationResult(object):
+
+    def __init__(self):
+        self._errors = []
+        self._warnings = []
+
+    def _add_error(self, id, description):
+        self._errors.append((id, description))
+
+    def _add_warning(self, id, description):
+        self._warnings.append((id, description))
+
+    @property
+    def errors(self):
+        return self._errors
+
+    @property
+    def warnings(self):
+        return self._warnings
+
+    @property
+    def passed(self):
+        return not bool(self.errors)
+
+    @property
+    def has_warnings(self):
+        return bool(self.warnings)
+
+    def error_description(self):
+        if not self.errors:
+            return None
+
+        return '\n'.join('Error: ' + desc for (id, desc) in self.errors)
+
+    def warning_description(self):
+        if not self.warnings:
+            return None
+
+        return '\n'.join('Warning: ' + desc for (id, desc) in self.warnings)
+
+    def _status_str(self):
+        status = ""
+
+        if self.passed:
+            status = "Passed"
+
+        if self.has_warnings:
+            status = "Warning"
+
+        if not self.passed:
+            status = "Failed"
+
+        return status
+
+    def __str__(self):
+        return self._status_str()
+
+
+def verify_recipe(recipe, format):
+    """Verify that a recipe is valid against the given format.
+    Returns a RecipeVerificationResult instance."""
+
+    recipe_data = recipe.data
+    result = RecipeVerificationResult()
+
+    # Check that all mandatory attributes are present (ERROR)
+    for attribute in format.mandatory_attributes:
+        if not attribute in recipe_data.keys():
+            result._add_error("missing-mandatory-attribute",
+                    "Missing mandatory attribute \"%s\"" % attribute)
+
+    # Check for unknown attributes (WARNING)
+    for attribute in recipe_data.keys():
+        if not attribute in format.all_attributes:
+            result._add_warning("unrecognized-attribute",
+                    "Unrecognised attribute \"%s\"" % attribute)
+
+    # Check that all attributes have supported values (ERROR)
+    for attribute, value in recipe_data.items():
+        if not attribute in format.all_attributes:
+            # Unknown
+            continue
+
+        supported_func = format.definition[attribute][5]
+
+        supported, desc = supported_func(value)
+        if not supported:
+            result._add_error("unsupported-attribute-value",
+                    "Value \"%s\" is not supported for attribute \"%s\". %s"
+                    % (value, attribute, desc))
+
+    return result
+
+class GenericRecipeFormat(object):
+
     # FIXME: Formalize supported values
     # TODO: some more could probably be optional?
     # TODO: define default value for optional attributes
@@ -161,14 +334,22 @@ class PackageMetadata(object):
     mandatory_attributes = set(format_mandatory_attributes(format_definition))
     optional_attributes = set(format_optional_attributes(format_definition))
 
+    all_attributes = set(format_attributes(format_definition))
 
-class PackageRecipe(object):
-    """ """
+    # Sanity checking
+    assert mandatory_attributes.union(optional_attributes) == all_attributes
+    assert not mandatory_attributes.intersection(optional_attributes)
 
-    # TODO: rename to GenericRecipe
+class GenericRecipe(object):
+    """Generic (target-independent) package recipe.
+    Format is defined by GenericRecipeFormat."""
+
 
     def __init__(self):
-        self._data = dict(PackageMetadata.default)
+        self._data = dict(GenericRecipeFormat.default)
+
+    def verify(self):
+        return verify_recipe(self, GenericRecipeFormat)
 
     def load(self, mapping):
         """Load the metadata from @mapping."""
@@ -176,17 +357,19 @@ class PackageRecipe(object):
         # TODO: warn on unknown input attributes
         # TODO: verify types of input attributes
 
-        self._data = dict(PackageMetadata.default)
+        self._data = dict(GenericRecipeFormat.default)
         self._data.update(mapping)
+        return self.verify()
 
     def load_from_string(self, string):
         """Load the metadata from @string in YAML format."""
         mapping = yaml.load(string)
-        self.load(mapping)
+        return self.load(mapping)
 
     def load_from_file(self, filepath):
+        """Load the recipe metadata from @filepath."""
         file_contents = open(filepath).read()
-        self.load_from_string(file_contents)
+        return self.load_from_string(file_contents)
 
     def get_data(self):
         # Return copy so that it cannot be mutated by others
@@ -195,8 +378,8 @@ class PackageRecipe(object):
 
 
 class TargetRecipe(object):
-    """Target specific recipe."""
-    
+    """Target specific package recipe."""
+
     def __init__(self):
         pass
 

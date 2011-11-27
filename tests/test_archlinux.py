@@ -50,7 +50,7 @@ class TestPkgbuildGeneration(unittest.TestCase):
     """Test PKGBUILD generation from reference input data."""
 
     def setUp(self):
-        rec = recipe.PackageRecipe()
+        rec = recipe.GenericRecipe()
         rec.load(input_metadata)
         
         tar = target.Target('gnulinux-archlinux-current-i686')

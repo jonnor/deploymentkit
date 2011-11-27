@@ -6,7 +6,7 @@ import deploymentkit
 import deploymentkit.core
 from deploymentkit.core.generator import Generator
 from deploymentkit.core.target import Target
-from deploymentkit.core.recipe import PackageRecipe, TargetRecipe, PackageMetadata
+from deploymentkit.core.recipe import GenericRecipe, TargetRecipe, GenericRecipeFormat
 
 def help_target_string():
     supported = Generator.supported_targets()
@@ -14,7 +14,7 @@ def help_target_string():
     return "Supported target platforms:\n%s" % supported_str
 
 def help_input_string():
-    return PackageMetadata.__doc__
+    return GenericRecipeFormat.__doc__
 
 if __name__ == '__main__':
 
@@ -41,6 +41,8 @@ if __name__ == '__main__':
         if options.help_target:
             print help_target_string()
 
+        sys.exit()
+
     else:
         if len(args) < 1:
             parser.error("No input file specified")
@@ -48,10 +50,18 @@ if __name__ == '__main__':
             parser.error("Too many arguments")
 
         input_file = args[0]
-        
-        generic_recipe = PackageRecipe()
-        generic_recipe.load_from_file(input_file)
-        
+
+        generic_recipe = GenericRecipe()
+        res = generic_recipe.load_from_file(input_file)
+
+        if res.has_warnings:
+            print res.warning_description()
+
+        if not res.passed:
+            print res.error_description()
+            sys.exit(1)
+
+
         target = Target()
         if options.target:
             target.from_string(options.target)
@@ -64,3 +74,4 @@ if __name__ == '__main__':
         target_recipe = generator.generate_target_recipe(generic_recipe, target)
         target_recipe.write_to_directory(options.output_dir)
 
+        sys.exit()
