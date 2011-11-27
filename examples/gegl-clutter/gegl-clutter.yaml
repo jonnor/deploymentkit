@@ -1,0 +1,10 @@
+Name: gegl-clutter
+BriefDescription: Gegl Clutter
+URL: http://www.gegl.org
+ReleaseVersion: 1
+Version: 1.0.0
+Licenses: [LGPL]
+BuildSystemType: autotools
+Dependencies: ["pkg-config:clutter-1.0", "pkg-config:gegl"]
+BuildDependencies: ["executable:pkg-config"]
+Sources: ["ftp://gimptest.flamingtext.com/pub/nightly-tarballs/gegl-clutter-git-master.tar.bz2"]

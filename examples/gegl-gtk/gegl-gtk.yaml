@@ -1,0 +1,10 @@
+Name: gegl-gtk
+BriefDescription: Gegl GTK
+URL: http://www.gegl.org
+ReleaseVersion: 1
+Version: 0.1.0
+Licenses: [LGPL]
+BuildSystemType: autotools
+Dependencies: ["pkg-config:gtk-2.0", "pkg-config:gegl"]
+BuildDependencies: ["executable:pkg-config"]
+Sources: ["ftp://gimptest.flamingtext.com/pub/nightly-tarballs/gegl-gtk-git-master.tar.bz2"]

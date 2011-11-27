@@ -1,0 +1,10 @@
+Name: gegl-qt
+BriefDescription: Gegl Qt
+URL: http://www.gegl.org
+ReleaseVersion: 1
+Version: 0.1.0
+Licenses: [LGPL]
+BuildSystemType: qmake
+Dependencies: ["pkg-config:QtGui", "pkg-config:gegl"]
+BuildDependencies: ["executable:pkg-config"]
+Sources: ["ftp://gimptest.flamingtext.com/pub/nightly-tarballs/gegl-qt-git-master.tar.bz2"]
