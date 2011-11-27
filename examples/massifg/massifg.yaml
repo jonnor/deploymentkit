@@ -1,0 +1,12 @@
+Name: massifg
+URL: http://live.gnome.org/MassifG
+BriefDescription: Visualization tool for valgrind massif output
+Version: 0.2.2
+ReleaseVersion: 0
+Licenses: [GPL]
+Sources: ["http://www.jonnor.com/files/massifg-0.2.2.tar.gz"]
+BuildSystemType: autotools
+BuildDependencies: []
+Dependencies: ["pkg-config:libgoffice-0.8", "pkg-config:gtk+-2.0"]
+Changelog: ""
+

@@ -1,0 +1,12 @@
+Name: babl
+URL: http://gegl.org/babl/
+Version: 0.1.4
+ReleaseVersion: 0
+Licenses: [LGPLv3+]
+BriefDescription: Dynamic Pixel Format Translation Library
+Description: Bla bla
+Sources: ["ftp://ftp.gtk.org/pub/babl/0.1/babl-0.1.4.tar.bz2"]
+BuildSystemType: autotools
+Dependencies: []
+BuildDependencies: ["executable:pkg-config"]
+Changelog: ""
