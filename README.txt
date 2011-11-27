@@ -7,6 +7,7 @@ Dependencies:
     Python (2.7+ at the moment)
     pyyaml
     Cheetah
+    Nose (optional, for running tests)
 
 = Purpose & Scope =
 Making it easier for software developers to deploy native packages,
@@ -18,14 +19,17 @@ GNU/Linux-centric prototype / feasibility study
 
 = Usage ==
 # Directly from source tree
-export PYTHONPATH=./
-./bin/dk-generate package.yaml
+  export PYTHONPATH=./
+  ./bin/dk-generate package.yaml
 
 # Installing and using from install
-python ./setup.py install
-dk-generate package.yaml
+  python ./setup.py install
+  dk-generate package.yaml
 
 See "dk-generate --help" and "dk-generate --help-input" for more information.
+
+# Running tests (from source tree)
+  nosetests
 
 = Principle =
 DeploymentKit defines a generic package metadata format (1),
