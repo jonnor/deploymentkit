@@ -1,4 +1,17 @@
 *.bak
 *.pyc
 *~
+
 build
+dist
+MANIFEST
+
+PKGBUILD
+.pkg.tar.*
+
+.dsc
+debian/
+.deb
+
+.spec
+.rpm
