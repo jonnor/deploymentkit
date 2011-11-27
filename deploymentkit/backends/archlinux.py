@@ -21,6 +21,7 @@ class GeneratorBackend(object):
     
     supported_buildsystems = [
         'autotools',
+        'distutils',
     ]
 
     def __init__(self):
@@ -59,8 +60,14 @@ def generic_to_specific_recipe(generic_data):
     specific_data = {}
     specific_data.update(generic_data)
 
-    build_commands = ['./configure --prefix=/usr', 'make']
-    install_commands = ['make DESTDIR="$pkgdir" install']
+    buildsystem_type = generic_data['BuildSystemType']
+    if buildsystem_type == 'autotools':
+        build_commands = ['./configure --prefix=/usr', 'make']
+        install_commands = ['make DESTDIR="$pkgdir" install']
+
+    elif buildsystem_type == 'distutils':
+        build_commands = ['']
+        install_commands  = ['python setup.py install --root="$pkgdir/"']
 
     specific_data['BuildCommands'] = build_commands
     specific_data['InstallCommands'] = install_commands
@@ -73,7 +80,6 @@ def generic_to_specific_recipe(generic_data):
     specific_data['BuildDependencies'] = []
     for dep in generic_data['BuildDependencies']:
         specific_data['BuildDependencies'].append(linux.map_dependency(dep, map_installed_file_to_package))
-
 
     specific_data['SupportedArchitectures'] = ['i686', 'x86_64']
 

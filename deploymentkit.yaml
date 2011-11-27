@@ -10,6 +10,7 @@ Description: DeploymentKit allows native packages for multiple
 Sources: ["./"]
 BuildSystemType: distutils
 ProjectType: python2-library
-Dependencies: ["python2:pyyaml", "python2:Cheetah"]
-BuildDependencies: [""]
+# Dependencies: ["python2:pyyaml", "python2:Cheetah"]
+Dependencies: []
+BuildDependencies: []
 Changelog: ""
