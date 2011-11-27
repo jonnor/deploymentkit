@@ -1,5 +1,5 @@
 
-import tarfile, subprocess, os
+import tarfile, subprocess, os, tempfile
 
 from Cheetah.Template import Template
 import yaml
@@ -112,6 +112,158 @@ def create_pkgbuild(metadata):
 
     return pkgbuild_str
 
+# For retrieving information from repos
+def arch_parse_files(files_str):
+    lines = files_str.split('\n')
+
+    files = []
+    state = 'none'
+    for line in lines:
+        if not line:
+            state = 'none'
+            continue
+            
+        elif '%FILES%' in line:
+            state = 'files'
+            continue
+            
+        elif line.startswith('%'):
+            state = 'unknown'
+            print "Unknown section found: %s" % line
+            continue
+
+        if state == 'files':
+            files.append(line)
+
+    pkginfo = {'Files': files}
+    return pkginfo
+
+def arch_parse_desc(desc_str):
+    raise NotImplementedError
+
+    pkginfo = {
+        'BriefDescription': desc,
+        'URL': url,
+    }
+
+    return pkginfo
+
+def arch_parse_depends(deps_str):
+    lines = deps_str.split('\n')
+    
+    deps = []
+    state = 'none'
+    for line in lines:
+        if not line:
+            state = 'none'
+            continue
+
+        elif '%DEPENDS%' in line:
+            state = 'depends'
+            continue
+            
+        elif '%CONFLICTS%' in line:
+            state = 'conflicts'
+            continue
+            
+        elif '%PROVIDES%' in line:
+            state = 'provides'
+            continue
+           
+        elif line.startswith('%'):
+            state = 'unknown'
+            print "Unknown section found: %s" % line
+            continue
+ 
+        if state == 'depends':
+            deps.append(line)
+    
+    pkginfo = {
+        'Dependencies': deps,
+    }
+
+    return pkginfo
+
+def arch_parse_pkgname(package_name):
+    """ """
+
+    split = package_name.split('-') 
+    if len(split) < 3:
+        raise ValueError, 'invalid package name %s' % (package_name,)
+
+    pkginfo = {
+        'Name': '-'.join(split[:-2]),
+        'Version': split[-2],
+        'Revision': split[-1],
+    }
+
+    return pkginfo
+
+def arch_parse_pkg(packages_dir, package_name, detailed=True):
+    pkg_info = {}
+    pkg_info.update(arch_parse_pkgname(package_name))
+        
+    def file_content(filename):
+        return open(os.path.join(packages_dir, package_name, filename)).read()
+        
+    if detailed:
+        #desc_string = file_content('desc')
+
+        #print desc_string
+        #pkg_info.update(arch_parse_desc(desc_string))
+        
+        files_string = file_content('files')
+        pkg_info.update(arch_parse_files(files_string))
+
+        depends_string = file_content('depends')
+        pkg_info.update(arch_parse_depends(depends_string))
+        
+    return pkg_info
+
+def arch_pkglist_from_path(repo_path):
+    
+    repo_file = tarfile.open(repo_path, 'r:gz')
+
+    tmp_dir = tempfile.mkdtemp()
+    repo_file.extractall(tmp_dir)
+
+    packages = {}
+
+    for package_dir in os.listdir(tmp_dir):
+        pkg_info = arch_parse_pkg(tmp_dir, package_dir)
+        packages[package_dir] = pkg_info
+
+    return packages
+
+def arch_pkglist(repository_file_path, output_path, detailed=False):
+    """ """
+
+    out_file = open(output_path, 'w')
+
+    packages = arch_pkglist_from_path(repository_file_path)
+
+    out_file.write(yaml.dump(packages))
+    out_file.close()
+
+def arch_generate_pkglists():
+    input_dir = '/var/cache/pkgtools/lists/'
+
+    version = 'current' # TODO: replace with date
+    distro_name = 'arch'
+    output_dir = os.path.join('data/distroinfo', distro_name , version)
+
+    repositories = ['core']
+
+    for repo in repositories:
+        path = os.path.join(input_dir, repo + '.files.tar.gz')
+        print path
+        output_path = os.path.join(output_dir, repo, 'package-list')
+        try:
+            os.makedirs(os.path.dirname(output_path))
+        except OSError:
+            pass
+        arch_pkglist(path, output_path)
+        
 # For testing
 def pkgbuild_attribute(pkgbuild, attribute):
     """Return the value of a given @attribute in @pkgbuild.
