@@ -88,7 +88,7 @@ class Generator(object):
 
         buildsystem_type = generic_recipe.data['BuildSystemType']
         if not buildsystem_type in backend.supported_buildsystems:
-            raise ValueError, "BuildSystemType: %s is not supported with backed: %s" % ()
+            raise ValueError, "BuildSystemType: \"%s\" is not supported for target: \"%s\" with backend %s" % (buildsystem_type, target, backend)
 
         backend_instance = backend()
         target_recipe = backend_instance.generate_target_recipe(generic_recipe, target)
