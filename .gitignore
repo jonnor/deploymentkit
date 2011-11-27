@@ -7,11 +7,11 @@ dist
 MANIFEST
 
 PKGBUILD
-.pkg.tar.*
+*.pkg.tar.*
 
-.dsc
+*.dsc
 debian/
-.deb
+*.deb
 
-.spec
-.rpm
+*.spec
+*.rpm
