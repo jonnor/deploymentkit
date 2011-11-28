@@ -1,0 +1,38 @@
+#!/usr/bin/env python2
+
+import sys, optparse
+
+import deploymentkit
+from deploymentkit.core.platforminfo import PlatformInfo
+from deploymentkit.core.target import Target
+
+if __name__ == '__main__':
+
+    parser = optparse.OptionParser(usage="Usage: %prog [options]")
+
+    parser.add_option("-t", "--target", dest="target", default="",
+                      help="The target to build for. See --help-target for details", metavar="TARGET")
+
+    parser.add_option("", "--help-target", action="store_true",
+                      help="Show help about the supported targets")
+
+    parser.add_option("-o", "--output-directory", dest="output_dir", default="./platform-info",
+                      help="Directory to output generated files to", metavar="DIR")
+
+    (options, args) = parser.parse_args()
+    
+    target = Target()
+    if options.target:
+        target.from_string(options.target)
+    else:
+        target = deploymentkit.core.target.get_default()
+    
+    platform_info = PlatformInfo()
+    platform_info.target = target
+    
+    platform_info.extract(options.output_dir)
+    
+    sys.exit(0)
+
+    
+    

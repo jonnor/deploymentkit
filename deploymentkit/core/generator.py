@@ -33,20 +33,8 @@ class Generator(object):
 
     def _find_backend(self, target):
         """Return the appropriate GeneratorBackend to use for @target"""
-
-        found_backend = None
-        
-        for backend in self._backends:
-
-            if target in backend.supported_targets:
-                if found_backend:
-                    print "Warning: Multiple backends supporting target: %s found" % target
-                    # TODO: better logging
                     
-                else:
-                    found_backend = backend
-                    
-        return found_backend
+        return backends.find_backend_for_target(self._backends, target)
 
     def generate_target_recipe(self, generic_recipe, target):
         """Return a TargetRecipe, given a GenericRecipe and a Target."""

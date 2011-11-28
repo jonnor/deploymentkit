@@ -1,5 +1,5 @@
 
-import tarfile, subprocess, os, tempfile
+import tarfile, subprocess, os, tempfile, shutil
 
 from Cheetah.Template import Template
 import yaml
@@ -11,6 +11,11 @@ archlinux_family = 'gnulinux'
 archlinux_series = 'archlinux'
 archlinux_versions = ['current']
 archlinux_architectures = ['i686', 'x86_64'] # XXX: should architectures be normalized?
+
+archlinux_supported_targets = [
+    target.Target("gnulinux-archlinux-current-x86_64"),
+    target.Target("gnulinux-archlinux-current-i686"),
+]
 
 def is_archlinux(target):
 
@@ -38,7 +43,6 @@ class TargetIdentifier(object):
         t.from_members(archlinux_family, archlinux_series, 'current', arch)
         return t
     
-    
 
 class ArchLinuxTargetRecipe(recipe.TargetRecipe):
     
@@ -47,10 +51,7 @@ class ArchLinuxTargetRecipe(recipe.TargetRecipe):
 
 class GeneratorBackend(object):
 
-    supported_targets = [
-        target.Target("gnulinux-archlinux-current-x86_64"),
-        target.Target("gnulinux-archlinux-current-i686"),
-    ]
+    supported_targets = archlinux_supported_targets
     
     supported_buildsystems = [
         'autotools',
@@ -80,7 +81,7 @@ class GeneratorBackend(object):
 
 class BuilderBackend(object):
 
-    supported_targets = GeneratorBackend.supported_targets
+    supported_targets = archlinux_supported_targets
     
     def run(self, target):
         """ """
@@ -92,6 +93,17 @@ class BuilderBackend(object):
         cmd = ['makepkg', '-f', '--skipinteg']
         print 'INFO: Running command %s' % ' '.join(cmd)
         subprocess.call(cmd)
+
+class PlatformInfoBackend(object):
+
+    supported_targets = archlinux_supported_targets
+    
+    def __init__(self):
+        pass
+        
+    def extract(self, target, output_dir):
+        arch_extract_platform_info(output_dir, target.to_string())
+
 
 def generic_to_specific_recipe(generic_data):
     """Return a mapping representing the target specific recipe data
@@ -200,6 +212,10 @@ def arch_parse_depends(deps_str):
     lines = deps_str.split('\n')
     
     deps = []
+    provides = []
+    optdeps = []
+    conflicts = []
+    
     state = 'none'
     for line in lines:
         if not line:
@@ -209,7 +225,11 @@ def arch_parse_depends(deps_str):
         elif '%DEPENDS%' in line:
             state = 'depends'
             continue
-            
+
+        elif '%OPTDEPENDS%' in line:
+            state = 'optdepends'
+            continue
+
         elif '%CONFLICTS%' in line:
             state = 'conflicts'
             continue
@@ -225,8 +245,21 @@ def arch_parse_depends(deps_str):
  
         if state == 'depends':
             deps.append(line)
+        elif state == 'optdepends':
+            optdeps.append(line)
+        elif state == 'conflicts':
+            conflicts.append(line)
+        elif state == 'provides':
+            provides.append(line)
+        elif state == 'none':
+            pass
+        else:
+            print 'Parser in unknown state: %s' % state
     
     pkginfo = {
+        'OptionalDependencies': optdeps,
+        'Provides': provides,
+        'Conflicts': conflicts,
         'Dependencies': deps,
     }
 
@@ -276,10 +309,17 @@ def arch_pkglist_from_path(repo_path):
     repo_file.extractall(tmp_dir)
 
     packages = {}
+    no_packages = len(os.listdir(tmp_dir))
+    print "%d packages" % no_packages
 
-    for package_dir in os.listdir(tmp_dir):
+    percentage = 0
+    for package_no, package_dir in enumerate(os.listdir(tmp_dir)):
         pkg_info = arch_parse_pkg(tmp_dir, package_dir)
         packages[package_dir] = pkg_info
+        
+        if package_no % no_packages/100 == 0:
+            percentage += 1
+            print "%s%%" % percentage
 
     return packages
 
@@ -290,27 +330,36 @@ def arch_pkglist(repository_file_path, output_path, detailed=False):
 
     packages = arch_pkglist_from_path(repository_file_path)
 
-    out_file.write(yaml.dump(packages))
+    # FIXME: this does not make any sense
+    # The serialization takes an eternity, 
+    # takes a ton of storage, and no-one can consume it directly
+    # Instead:
+    # - Store and operate on the ArchLinux specific repository info 
+    # (pkgfile tarballs)
+    # - Convert into a ready-to-consume dependency mapping
+    # TODO: set up builders for retrieving repo info at regular intervals
+    dumper = yaml.SafeDumper(out_file)
+    dumper.open()
+    dumper.represent(packages)
+    dumper.close()
+    
     out_file.close()
 
-def arch_generate_pkglists():
+def arch_extract_platform_info(output_dir, target_id):
     input_dir = '/var/cache/pkgtools/lists/'
 
-    version = 'current' # TODO: replace with date
-    distro_name = 'arch'
-    output_dir = os.path.join('data/distroinfo', distro_name , version)
+    output_dir = os.path.join(output_dir, target_id)
 
-    repositories = ['core']
+    repositories = ['core', 'extra', 'community']
 
+    # Extract raw information
     for repo in repositories:
-        path = os.path.join(input_dir, repo + '.files.tar.gz')
-        print path
-        output_path = os.path.join(output_dir, repo, 'package-list')
-        try:
-            os.makedirs(os.path.dirname(output_path))
-        except OSError:
-            pass
-        arch_pkglist(path, output_path)
+        
+        basename = repo + '.files.tar.gz'
+        src = os.path.join(input_dir, basename)
+        dst = os.path.join(output_dir, basename)
+        shutil.copyfile(src, dst)
+
         
 # For testing
 def pkgbuild_attribute(pkgbuild, attribute):

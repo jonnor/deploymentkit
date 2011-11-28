@@ -24,7 +24,7 @@ class Builder(object):
 
         return backend.run(self._target)
 
-    def get_target(self, target):
+    def get_target(self):
         return self._target
 
     def set_target(self, target):
@@ -35,21 +35,7 @@ class Builder(object):
     def _find_backend(self):
         """Return the appropriate backend to use."""
 
-        target = self._target
-
-        found_backend = None
-
-        for backend in self._backends:
-
-            if target in backend.supported_targets:
-                if found_backend:
-                    print "Warning: Multiple backends supporting target: %s found" % target
-                    # TODO: better logging
-
-                else:
-                    found_backend = backend
-
-        return found_backend
+        return backends.find_backend_for_target(self._backends, self.target)
 
 class BuilderBackendInterface(object):
 

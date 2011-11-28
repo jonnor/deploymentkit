@@ -29,3 +29,20 @@ def load(backend_type):
         
     return backend_classes
 
+def find_backend_for_target(backends, target):
+    found_backend = None
+    
+    for backend in backends:
+
+        if target in backend.supported_targets:
+            if found_backend:
+                print "Warning: Multiple backends supporting target: %s found" % target
+                # TODO: better logging
+                
+            else:
+                found_backend = backend
+
+    if not found_backend:
+        print "Warning: No backend found for target: %s" % target
+
+    return found_backend
