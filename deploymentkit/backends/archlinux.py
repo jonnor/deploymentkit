@@ -15,36 +15,28 @@ archlinux_architectures = ['i686', 'x86_64'] # XXX: should architectures be norm
 def is_archlinux(target):
 
     return (target.family == archlinux_family and target.series == archlinux_series)
-
-def build(target):
-    """ """
-    if not is_archlinux(target):
-        raise ValueError, 'Unsupported target: %s' % target
-
-    # FIXME: needs to be something that does not fail on
-    # expected things like missing dependencies
-    cmd = ['makepkg', '-f', '--skipinteg']
-    print 'INFO: Running command %s' % ' '.join(cmd)
-    subprocess.call(cmd)
-
-def get_host():
-
-    # XXX: This is as unreliable/ambigious as detecting a Linux
-    # distribution typically is.
-
-    (sysname, nodename, release, version, machine) = os.uname()
-
-    if sysname != 'Linux':
-        return None
-    
-    if not os.path.exists('/etc/arch-release'):
-        return None
         
-    arch = machine
+class TargetIdentifier(object):
+    
+    @staticmethod
+    def query():
 
-    t = target.Target()
-    t.from_members(archlinux_family, archlinux_series, 'current', arch)
-    return t
+        # XXX: This is as unreliable/ambigious as detecting a Linux
+        # distribution typically is.
+
+        (sysname, nodename, release, version, machine) = os.uname()
+
+        if sysname != 'Linux':
+            return None
+        
+        if not os.path.exists('/etc/arch-release'):
+            return None
+            
+        arch = machine
+
+        t = target.Target()
+        t.from_members(archlinux_family, archlinux_series, 'current', arch)
+        return t
     
     
 
@@ -85,6 +77,21 @@ class GeneratorBackend(object):
         output._files = files
         
         return output
+
+class BuilderBackend(object):
+
+    supported_targets = GeneratorBackend.supported_targets
+    
+    def run(self, target):
+        """ """
+        if not is_archlinux(target):
+            raise ValueError, 'Unsupported target: %s' % target
+
+        # FIXME: needs to be something that does not fail on
+        # expected things like missing dependencies
+        cmd = ['makepkg', '-f', '--skipinteg']
+        print 'INFO: Running command %s' % ' '.join(cmd)
+        subprocess.call(cmd)
 
 def generic_to_specific_recipe(generic_data):
     """Return a mapping representing the target specific recipe data

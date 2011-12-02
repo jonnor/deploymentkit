@@ -5,45 +5,23 @@
 """
 
 from deploymentkit.core.target import Target
+from deploymentkit.core import backends
 
 import os
 import os.path
-
-def _load_backends():
-    """Loads all backends from backends/ directory.
-    Returns a list of GeneratorBackend classes"""
-
-    backend_classes = []
-
-    base_module = 'deploymentkit.backends'
-
-    module = __import__(base_module, globals(), locals(), [])
-    backends_module = module.backends
-
-    backend_files = os.listdir(backends_module.__path__[0])
-    for filename in backend_files:
-        modulename = os.path.splitext(filename)[0]
-        
-        module = __import__(base_module + '.' + modulename, globals(), locals(), [])
-
-        backend_module = getattr(module.backends, modulename)
-        if hasattr(backend_module, "GeneratorBackend"):
-            backend_class = backend_module.GeneratorBackend
-            if not backend_class in backend_classes:
-                backend_classes.append(backend_class)
-        
-    return backend_classes
 
 
 class Generator(object):
     """Used to transform a GenericRecipe into a TargetRecipe."""
 
-    _backends = _load_backends()
+    _backends = backends.load('GeneratorBackend')
 
     @classmethod
     def supported_targets(cls):
         """Return a list of all supported targets."""
 
+        # FIXME: has duplicates. Should be a set, 
+        # but that requires interning of Target instances
         supported = []
         for backend in cls._backends:
             supported.extend(backend.supported_targets)
