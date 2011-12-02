@@ -61,14 +61,11 @@ if __name__ == '__main__':
             print res.error_description()
             sys.exit(1)
 
-
         target = Target()
         if options.target:
             target.from_string(options.target)
         else:
-            # FIXME: unhardcode, move into target
-            # Introduce a way of getting the default target automatically
-            target.from_string("gnulinux-archlinux-current-x86_64")
+            target = deploymentkit.core.target.get_default()
 
         generator = Generator()
         target_recipe = generator.generate_target_recipe(generic_recipe, target)

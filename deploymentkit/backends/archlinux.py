@@ -7,6 +7,47 @@ import yaml
 from deploymentkit.core import recipe, target
 from deploymentkit.backends import linux
 
+archlinux_family = 'gnulinux'
+archlinux_series = 'archlinux'
+archlinux_versions = ['current']
+archlinux_architectures = ['i686', 'x86_64'] # XXX: should architectures be normalized?
+
+def is_archlinux(target):
+
+    return (target.family == archlinux_family and target.series == archlinux_series)
+
+def build(target):
+    """ """
+    if not is_archlinux(target):
+        raise ValueError, 'Unsupported target: %s' % target
+
+    # FIXME: needs to be something that does not fail on
+    # expected things like missing dependencies
+    cmd = ['makepkg', '-f', '--skipinteg']
+    print 'INFO: Running command %s' % ' '.join(cmd)
+    subprocess.call(cmd)
+
+def get_host():
+
+    # XXX: This is as unreliable/ambigious as detecting a Linux
+    # distribution typically is.
+
+    (sysname, nodename, release, version, machine) = os.uname()
+
+    if sysname != 'Linux':
+        return None
+    
+    if not os.path.exists('/etc/arch-release'):
+        return None
+        
+    arch = machine
+
+    t = target.Target()
+    t.from_members(archlinux_family, archlinux_series, 'current', arch)
+    return t
+    
+    
+
 class ArchLinuxTargetRecipe(recipe.TargetRecipe):
     
     def files(self):
@@ -81,7 +122,7 @@ def generic_to_specific_recipe(generic_data):
     for dep in generic_data['BuildDependencies']:
         specific_data['BuildDependencies'].append(linux.map_dependency(dep, map_installed_file_to_package))
 
-    specific_data['SupportedArchitectures'] = ['i686', 'x86_64']
+    specific_data['SupportedArchitectures'] = archlinux_architectures
 
     return specific_data
     

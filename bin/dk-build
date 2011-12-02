@@ -1,0 +1,46 @@
+#!/usr/bin/env python2
+
+import sys, optparse
+
+import deploymentkit
+import deploymentkit.core
+from deploymentkit.core.target import Target
+from deploymentkit.core.build import Builder
+
+def help_target_string():
+    supported = Builder.supported_targets()
+    supported_str = ", ".join([str(i) for i in supported])
+    return "Supported target platforms:\n%s" % supported_str
+
+if __name__ == '__main__':
+
+    parser = optparse.OptionParser(usage="Usage: %prog [options]")
+
+    parser.add_option("-t", "--target", dest="target", default="",
+                      help="The target to build for. See --help-target for details", metavar="TARGET")
+
+    parser.add_option("", "--help-target", action="store_true",
+                      help="Show help about the supported targets")
+
+    (options, args) = parser.parse_args()
+
+    if options.help_target:
+        parser.print_usage()
+
+        if options.help_target:
+            print help_target_string()
+
+        sys.exit()
+
+    target = Target()
+    if options.target:
+        target.from_string(options.target)
+    else:
+        target = deploymentkit.core.target.get_default()
+
+    builder = Builder()
+    builder.target = target
+
+    builder.run()
+	
+

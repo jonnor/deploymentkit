@@ -30,6 +30,4 @@ dk-generate $input --output-dir=$output_dir --target $target || exit 1
 
 ### Build ###
 cd $output_dir
-
-# archlinux specific
-makepkg -f --skipinteg || exit 2
+dk-build --target $target || exit 2

@@ -2,6 +2,25 @@
 
 """
 
+import os
+
+def get_host():
+    """ """
+
+    # FIXME: Come up with a generic way of fetching this
+    # Same pattern as for generator backends?
+    from deploymentkit.backends import archlinux
+    return archlinux.get_host()
+
+def get_default():
+    """ """
+
+    # TODO: Should maybe be configurable?
+
+    return get_host()
+
+
+
 class Target(object):
     """Identifes a target (platform).
     
@@ -20,7 +39,14 @@ class Target(object):
         
         if identifier_string is not None:
             self.from_string(identifier_string)
-        
+
+    def from_members(self, family, series, version, arch, *ignore):
+
+        self._family = family
+        self._series = series
+        self._version = version
+        self._architecture = arch
+
     def from_string(self, identifier_string):
         """
         Set the target from a identifier string on form
@@ -32,10 +58,7 @@ class Target(object):
         except IndexError:
             raise ValueError, 'Invalid target identifier string: %s' % identifier_string
         else:
-            self._family = family
-            self._series = series
-            self._version = version
-            self._architecture = arch
+            self.from_members(family, series, version, arch)
 
     def to_string(self):
         fields = [self._family, self._series, self._version, self._architecture]
@@ -53,4 +76,10 @@ class Target(object):
     def __repr__(self):
         return '%s(%s)' % ('Target', self.to_string())
 
+    @property
+    def family(self):
+        return self._family
 
+    @property
+    def series(self):
+        return self._series
