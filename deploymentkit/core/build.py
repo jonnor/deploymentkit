@@ -4,6 +4,7 @@ class Builder(object):
 
 	@staticmethod
 	def supported_targets():
+		from deploymentkit.backends import archlinux
 		return archlinux.GeneratorBackend.supported_targets
 
 	def __init__(self):
