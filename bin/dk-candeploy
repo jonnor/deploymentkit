@@ -1,0 +1,74 @@
+#!/usr/bin/env python2
+
+import sys, optparse
+
+import deploymentkit
+import deploymentkit.core
+from deploymentkit.core.target import Target
+from deploymentkit.core.build import Builder
+from deploymentkit.core.generator import Generator
+
+# TODO: 
+# - Add more reasons for unable to deploy: missing dependencies, ?
+#
+# - Allow to pass in a datastructure describing the
+# distribution of target users across targets, and from this
+# calculate how many percent of target users can be deployed for
+
+if __name__ == '__main__':
+
+    parser = optparse.OptionParser(usage="Usage: %prog FILE.yaml [options]")
+
+    parser.add_option("-t", "--targets", dest="targets", default="",
+                      help="Comma separated list of targets to check if can deploy for.", metavar="TARGET")
+
+    parser.add_option("-l", "--list-all", action='store_true', dest="list_all", default="",
+                      help="List all targets that can be deployed for.", metavar="TARGET")
+
+    (options, args) = parser.parse_args()
+
+    can_deploy = True
+
+    if options.targets:
+        wanted = set(options.targets.split(','))
+    else:
+        wanted = set([deploymentkit.core.target.get_default().to_string()])
+
+    generation_supported = set([t.to_string() for t in Generator.supported_targets()])
+    build_supported = set([t.to_string() for t in Builder.supported_targets()])
+    some_support = generation_supported.union(build_supported)
+
+    deploy_supported = build_supported.intersection(generation_supported)
+    partially_supported = build_supported.symmetric_difference(generation_supported)
+
+    if options.list_all:
+        print 'Can deploy for targets:'
+        print '\n'.join(deploy_supported)
+        print ''
+        print 'Partial support for targets:'
+        print '\n'.join(partially_supported)
+        sys.exit(0)
+
+    # No support at all
+    no_support = wanted.difference(some_support)
+    if no_support:
+        print 'Cannot deploy for targets (%s):' % 'Not supported'
+        print '\n'.join(no_support)
+        can_deploy = False
+
+    else:
+        # Missing generation support
+        no_generation = wanted.difference(generation_supported)
+        if no_generation:
+            print 'Cannot deploy for targets (%s):' % 'Recipe generation not supported'
+            print '\n'.join(no_generation)
+            can_deploy = False
+
+        # Missing build triggering support
+        no_build = wanted.difference(build_supported)
+        if no_build:
+            print 'Cannot deploy for targets (%s):' % 'Triggering build not supported'
+            print '\n'.join(no_build)
+            can_deploy = False
+
+    sys.exit(0 if can_deploy else -1)
