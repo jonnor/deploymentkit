@@ -7,7 +7,8 @@ BriefDescription: Making deployment of native packages easy
 Description: DeploymentKit allows native packages for multiple 
              target platforms to be generated from a single
              package recipe
-Sources: ["./"]
+Sources: ["http://build.deploymentkit.org/tarballs/deploymentkit-0.0.1.tar.gz"]
+Md5sums: ["56132557155e0d7a8cc0707477331cd7"]
 BuildSystemType: distutils
 ProjectType: python2-library
 # Dependencies: ["python2:pyyaml", "python2:Cheetah"]

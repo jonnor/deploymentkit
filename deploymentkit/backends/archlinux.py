@@ -126,7 +126,18 @@ def generic_to_specific_recipe(generic_data):
 
     elif buildsystem_type == 'distutils':
         build_commands = ['']
-        install_commands  = ['python setup.py install --root="$pkgdir/"']
+        if generic_data['ProjectType'].startswith('python2'):
+            install_commands  = ['python2 setup.py install --root="$pkgdir/"']
+        elif generic_data['ProjectType'].startswith('python3'):
+            install_commands  = ['python setup.py install --root="$pkgdir/"']
+
+    if generic_data['ProjectType'].startswith('python2'):
+        if not 'executable:python2' in generic_data['Dependencies']:
+            generic_data['Dependencies'].append('executable:python2')
+
+    if generic_data['ProjectType'].startswith('python3'):
+        if not 'executable:python' in generic_data['Dependencies']:
+            generic_data['Dependencies'].append('executable:python')
 
     specific_data['BuildCommands'] = build_commands
     specific_data['InstallCommands'] = install_commands
