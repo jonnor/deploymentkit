@@ -88,9 +88,8 @@ class BuilderBackend(object):
         if not is_archlinux(target):
             raise ValueError, 'Unsupported target: %s' % target
 
-        # FIXME: needs to be something that does not fail on
-        # expected things like missing dependencies
-        cmd = ['makepkg', '-f', '--skipinteg']
+
+        cmd = ['sudo', 'extra-%s-build' % target.architecture]
         print 'INFO: Running command %s' % ' '.join(cmd)
         subprocess.call(cmd)
 

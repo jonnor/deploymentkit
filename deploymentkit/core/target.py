@@ -113,4 +113,7 @@ class Target(object):
     def series(self):
         return self._series
 
+    @property
+    def architecture(self):
+        return self._architecture
 

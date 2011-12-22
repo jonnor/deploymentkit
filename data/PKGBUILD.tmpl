@@ -33,8 +33,11 @@ source=(#slurp
 $source #slurp
 #end for
 )
-
-md5sums=()
+md5sums=(#slurp
+#for $md5 in $Md5sums
+$md5 #slurp
+#end for
+)
 
 # Optional
 groups=()
