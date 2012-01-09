@@ -148,7 +148,8 @@ def any_string(attribute_value):
 def supported_buildsystem(attribute_value):
     """ """
 
-     # Union of all supported build systems from backends
+    # Union of all supported build systems from backends
+    # FIXME: query dynamically
     supported = ['autotools', 'distutils']
 
     explanation = "Must be one of: %s" % str(supported)
@@ -157,6 +158,54 @@ def supported_buildsystem(attribute_value):
         return (True, explanation)
     else:
         return (False, explanation)
+
+def supported_project_type(attribute_value):
+    """ """
+    
+    # Union of all supported project types from backends
+    # FIXME: query dynamically
+    supported = ['python2-library', 'python3-library']
+
+    explanation = "Must be one of: %s" % str(supported)
+
+    if attribute_value in supported:
+        return (True, explanation)
+    else:
+        return (False, explanation)
+
+def valid_uri(attribute_value):
+
+    supported_schemes = ['http', 'ftp']
+
+    # TODO: check for invalid characters
+    uri = attribute_value
+
+    try:
+        scheme = uri.split('://')[0]
+    except IndexError:
+        return (False, 'URL is malformed: %s' % uri)
+    else:
+        if scheme not in supported_schemes:
+            return (False, 'URI scheme: "%s" is not supported' % scheme)
+
+    e = 'URL is valid'
+    return True, e
+
+def list_of_uris(attribute_value):
+    
+    e = ''
+    all_valid = True
+    for string in attribute_value:
+        valid, explanation = valid_uri(string)
+        if not valid:
+            all_valid = False
+            e.append(explanation)
+        
+    if not e:
+        e = "List of valid URI strings accepted."
+        
+    return (all_valid, e)
+    
 
 format_definition = {
     # 'Attribute': (mandatory, value_type, default_value,
@@ -167,6 +216,7 @@ format_definition = {
     # supported_func: Function recieves the value of the attribute
     # and returns a tuple: a boolean to indicate validity,
     # and a string describing what is valid / not valid.
+    
     'Name': (True, 'string', None,
             'Name of the software', 'foo',
             any_string
@@ -197,7 +247,12 @@ format_definition = {
     'URL': (True, 'string', None,
             'The homepage of the software',
             'http://www.example.org/foo',
-            any_string
+            valid_uri
+            ),
+
+    'ProjectType': (True, 'string', None,
+            'The type of project', 'python2-library',
+            supported_project_type
             ),
 
     'BuildSystemType': (True, 'string', None,
@@ -217,10 +272,24 @@ format_definition = {
             ),
 
     'BuildDependencies': (True, 'list-of-strings', None,
-            'The runtime dependencies of this software',
+            'The buildtime dependencies of this software',
             ["pkg-config:glib-2.0","executable:gcc"],
             list_of_dependencies
             ),
+            
+    'Sources': (True, 'list-of-string', None,
+            'The source code', [],
+            list_of_uris
+            ),
+
+    # FIXME: should have a more flexible solutions, which
+    # also allows other types of hashes like SHA256 etc.
+    # SourceHashes: ['md5:HASH', 'sha256:HASH'] ?
+    'Md5sums': (True, 'list-of-string', None,
+            'The MD5 hashes for each entry in Source', [],
+            list_of_any_strings
+            ),
+    
 }
 
 
