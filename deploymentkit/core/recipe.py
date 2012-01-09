@@ -164,7 +164,8 @@ def supported_project_type(attribute_value):
     
     # Union of all supported project types from backends
     # FIXME: query dynamically
-    supported = ['python2-library', 'python3-library']
+    supported = ['python2-library', 'python3-library',
+                 'c-library', 'c-application']
 
     explanation = "Must be one of: %s" % str(supported)
 

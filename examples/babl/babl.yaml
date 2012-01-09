@@ -8,6 +8,7 @@ Description: Bla bla
 Sources: ["ftp://ftp.gtk.org/pub/babl/0.1/babl-0.1.4.tar.bz2"]
 Md5sums: ["1deaf8188b200b10d98a343a7e712b2b"]
 BuildSystemType: autotools
+ProjectType: 'c-library'
 Dependencies: []
 BuildDependencies: ["executable:pkg-config"]
 Changelog: ""
