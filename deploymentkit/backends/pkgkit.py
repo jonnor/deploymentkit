@@ -1,5 +1,7 @@
 """Common backend code for PackageKit"""
 
+import subprocess
+
 def package_from_pkgconfig_packagekit(target, pkg_config_id):
 
     pkg_config_file = pkg_config_id + '.pc'
