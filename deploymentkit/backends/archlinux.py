@@ -360,6 +360,9 @@ def arch_extract_platform_info(output_dir, target_id):
 
     output_dir = os.path.join(output_dir, target_id)
 
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     repositories = ['core', 'extra', 'community']
 
     # Extract raw information
