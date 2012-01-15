@@ -51,8 +51,8 @@ input_metadata = {
 # FIXME: allow to pass in a static dependency resolution map
 # so that this test is indendent of the system the tests runs on
 
-if not archlinux.is_archlinux(target.get_default()):
-
+native_target = target.get_host()
+if not native_target or not archlinux.is_archlinux(native_target):
     sys.stderr.write('WARNING: Skipping Archlinux specific tests')
 else:
 
