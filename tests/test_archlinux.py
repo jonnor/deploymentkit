@@ -1,4 +1,4 @@
-import unittest, os
+import unittest, os, sys
 
 import deploymentkit
 from deploymentkit.core import recipe, target, generator
@@ -48,38 +48,46 @@ input_metadata = {
     'Sources': [],
 }
 
-class TestPkgbuildGeneration(unittest.TestCase):
-    """Test PKGBUILD generation from reference input data."""
+# FIXME: allow to pass in a static dependency resolution map
+# so that this test is indendent of the system the tests runs on
 
-    def setUp(self):
-        rec = recipe.GenericRecipe()
-        rec.load(input_metadata)
-        
-        tar = target.Target('gnulinux-archlinux-current-i686')
-        
-        gen = generator.Generator()
-        output = gen.generate_target_recipe(rec, tar)
+if not archlinux.is_archlinux(target.get_default()):
 
-        self.str = output.files()['PKGBUILD']
+    sys.stderr.write('WARNING: Skipping Archlinux specific tests')
+else:
 
-    def test_pkgname(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'pkgname'), 'testpackage')
+    class TestPkgbuildGeneration(unittest.TestCase):
+        """Test PKGBUILD generation from reference input data."""
 
-    def test_pkgver(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'pkgver'), '0.0.1')
+        def setUp(self):
+            rec = recipe.GenericRecipe()
+            rec.load(input_metadata)
+            
+            tar = target.Target('gnulinux-archlinux-current-i686')
+            
+            gen = generator.Generator()
+            output = gen.generate_target_recipe(rec, tar)
 
-    def test_pkgrel(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'pkgrel'), '1')
+            self.str = output.files()['PKGBUILD']
 
-    def test_pkgdesc(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'pkgdesc'), '\"This is a test package\"')
+        def test_pkgname(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'pkgname'), 'testpackage')
 
-    # TODO: remove trailing whitespace after last element
-    def test_pkgarch(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'arch'), '(\'i686\' \'x86_64\' )')
+        def test_pkgver(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'pkgver'), '0.0.1')
 
-    def test_license(self):
-        self.assertEqual(pkgbuild_attribute(self.str, 'license'), '(\'GPL\' \'custom\' )')
+        def test_pkgrel(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'pkgrel'), '1')
+
+        def test_pkgdesc(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'pkgdesc'), '\"This is a test package\"')
+
+        # TODO: remove trailing whitespace after last element
+        def test_pkgarch(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'arch'), '(\'i686\' \'x86_64\' )')
+
+        def test_license(self):
+            self.assertEqual(pkgbuild_attribute(self.str, 'license'), '(\'GPL\' \'custom\' )')
 
 
 testdata_pkgname = 'gcc-fortran-4.5.2-6'
