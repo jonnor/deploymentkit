@@ -1,45 +1,45 @@
 #!/usr/bin/env python2
 
-import sys, optparse
+import sys, optparse, os.path
 
 import deploymentkit
 import deploymentkit.core
 from deploymentkit.core.generator import Generator
-from deploymentkit.core.target import Target
-from deploymentkit.core.recipe import GenericRecipe, TargetRecipe, GenericRecipeFormat
 
-def help_target_string():
+from deploymentkit.core import recipe, target
+
+def help_targets_string():
     supported = Generator.supported_targets()
     supported_str = ", ".join([str(i) for i in supported])
     return "Supported target platforms:\n%s" % supported_str
 
 def help_input_string():
-    return GenericRecipeFormat.__doc__
+    return recipe.GenericRecipeFormat.__doc__
 
 if __name__ == '__main__':
 
     parser = optparse.OptionParser(usage="Usage: %prog [options] FILE.yaml")
-    parser.add_option("-t", "--target", dest="target", default="",
-                      help="The target to generate package recipe for. See --help-target for details", metavar="TARGET")
+    parser.add_option("-t", "--targets", dest="targets", default="",
+                      help="The targets to generate build recipes for. See --help-targets for details", metavar="TARGETS")
     parser.add_option("-o", "--output-directory", dest="output_dir", default="./",
                       help="Directory to output generated files to", metavar="DIR")
 
     parser.add_option("", "--help-input", action="store_true",
                       help="Show help about input file format")
-    parser.add_option("", "--help-target", action="store_true",
+    parser.add_option("", "--help-targets", action="store_true",
                       help="Show help about the supported targets")
 
     (options, args) = parser.parse_args()
 
-    if options.help_input or options.help_target:
+    if options.help_input or options.help_targets:
 
         parser.print_usage()
 
         if options.help_input:
             print help_input_string()
 
-        if options.help_target:
-            print help_target_string()
+        if options.help_targets:
+            print help_targets_string()
 
         sys.exit()
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
         input_file = args[0]
 
-        generic_recipe = GenericRecipe()
+        generic_recipe = recipe.GenericRecipe()
         res = generic_recipe.load_from_file(input_file)
 
         if res.has_warnings:
@@ -61,14 +61,16 @@ if __name__ == '__main__':
             print res.error_description()
             sys.exit(1)
 
-        target = Target()
-        if options.target:
-            target.from_string(options.target)
+        if options.targets:
+            targets = target.targets_from_string(options.targets)
         else:
-            target = deploymentkit.core.target.get_default()
+            targets = [deploymentkit.core.target.get_default()]
 
         generator = Generator()
-        target_recipe = generator.generate_target_recipe(generic_recipe, target)
-        target_recipe.write_to_directory(options.output_dir)
+        build_recipes = generator.generate_build_recipes(generic_recipe, targets)
+        
+        package_name = os.path.basename(input_file).split('.')[0]
+        
+        recipe.write_build_recipes_to_directory(package_name, build_recipes, options.output_dir)
 
         sys.exit()

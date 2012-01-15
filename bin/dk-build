@@ -4,8 +4,7 @@ import sys, optparse
 
 import deploymentkit
 import deploymentkit.core
-from deploymentkit.core.target import Target
-from deploymentkit.core.build import Builder
+from deploymentkit.core import target, build, recipe
 
 def help_target_string():
     supported = Builder.supported_targets()
@@ -14,33 +13,40 @@ def help_target_string():
 
 if __name__ == '__main__':
 
-    parser = optparse.OptionParser(usage="Usage: %prog [options]")
+    parser = optparse.OptionParser(usage="Usage: %prog [options] FILE.build.yaml")
 
-    parser.add_option("-t", "--target", dest="target", default="",
-                      help="The target to build for. See --help-target for details", metavar="TARGET")
+    parser.add_option("-t", "--targets", dest="targets", default="",
+                      help="The targets to build for. See --help-targets for details", metavar="TARGET")
 
-    parser.add_option("", "--help-target", action="store_true",
+    parser.add_option("", "--help-targets", action="store_true",
                       help="Show help about the supported targets")
 
     (options, args) = parser.parse_args()
 
-    if options.help_target:
+    if options.help_targets:
         parser.print_usage()
 
-        if options.help_target:
+        if options.help_targets:
             print help_target_string()
 
         sys.exit()
 
-    target = Target()
-    if options.target:
-        target.from_string(options.target)
+    if len(args) < 1:
+        parser.error("No input file specified")
+    elif len(args) > 1:
+        parser.error("Too many arguments")
+
+    input_file = args[0]
+    recipes = recipe.build_recipes_from_file(input_file)
+
+    if options.targets:
+        targets = target.targets_from_string(options.targets)
     else:
-        target = deploymentkit.core.target.get_default()
+        targets = [deploymentkit.core.target.get_default()]
 
-    builder = Builder()
-    builder.target = target
+    builder = build.Builder()
 
-    builder.run()
+    for recipe in recipes:
+        builder.run(recipe, targets)
 	
 

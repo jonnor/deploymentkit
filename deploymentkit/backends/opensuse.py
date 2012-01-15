@@ -11,16 +11,13 @@ opensuse_arctectures = ['i586', 'x86_64']
 opensuse_series = 'opensuse'
 opensuse_family = 'gnulinux'
 
+opensuse_native_buildtoolchain = 'opensuse-native'
+
 opensuse_supported_targets = []
 for version in opensuse_versions:
     for arch in opensuse_arctectures:
         t = target.Target("%s-%s-%s-%s" % (opensuse_family, opensuse_series, version, arch))
         opensuse_supported_targets.append(t)
-
-class OpensuseTargetRecipe(recipe.TargetRecipe):
-
-    def files(self):
-        return self._files
 
 def is_opensuse(target):
 
@@ -76,9 +73,9 @@ class GeneratorBackend(object):
     def __init__(self):
         pass
 
-    def generate_target_recipe(self, generic_recipe, target):
+    def generate_build_recipe(self, generic_recipe, targets):
 
-        assert target in self.supported_targets
+        assert set(targets).intersection(set(self.supported_targets))
 
         # Map target independent values into target specific values.
         target_pkg_recipe = generic_to_specific_recipe(generic_recipe.data)
@@ -89,8 +86,11 @@ class GeneratorBackend(object):
         except KeyError:
             files = {}
 
-        output = OpensuseTargetRecipe()
-        output._files = files
+        output = recipe.BuildRecipe()
+        output.files = files.keys()
+        output.targets = targets
+        output.file_contents = files
+        output.toolchain = opensuse_native_buildtoolchain
 
         return output
 
@@ -98,16 +98,22 @@ class GeneratorBackend(object):
 class BuilderBackend(object):
 
     supported_targets = opensuse_supported_targets
+    toolchain = opensuse_native_buildtoolchain
 
-    def run(self, target):
+    def run(self, build_recipe, targets):
         """ """
-        if not is_opensuse(target):
-            raise ValueError, 'Unsupported target: %s' % target
+        
+        spec_file = [path for path in build_recipe.files if path.endswith('.spec')][0]
+        
+        for target in targets:
+            # FIXME: need to pass in specified targets properly
+            
+            if not is_opensuse(target):
+                raise ValueError, 'Unsupported target: %s' % target
 
-        # FIXME: need to be able to get the .spec file to use generically
-        cmd = ['sudo', 'build', 'babl.spec']
-        print 'INFO: Running command %s' % ' '.join(cmd)
-        subprocess.call(cmd)
+            cmd = ['sudo', 'build', spec_file]
+            print 'INFO: Running command %s' % ' '.join(cmd)
+            subprocess.call(cmd)
 
 def generic_to_specific_recipe(generic_data):
     """Return a mapping representing the target specific recipe data

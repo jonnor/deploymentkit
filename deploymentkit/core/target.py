@@ -49,6 +49,8 @@ def get_default():
     return get_host()
 
 
+def targets_from_string(string):
+    return [Target(s) for s in string.split(',')]
 
 class Target(object):
     """Identifes a target (platform).
@@ -92,6 +94,9 @@ class Target(object):
     def to_string(self):
         fields = [self._family, self._series, self._version, self._architecture]
         return '-'.join(fields)
+
+    def __hash__(self):
+        return hash(self.to_string())
 
     def __eq__(self, other):
         return repr(self) == repr(other)

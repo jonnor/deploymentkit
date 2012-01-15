@@ -12,7 +12,7 @@ import os.path
 
 
 class Generator(object):
-    """Used to transform a GenericRecipe into a TargetRecipe."""
+    """Used to transform a GenericRecipe into BuildRecipes."""
 
     _backends = backends.load('GeneratorBackend')
 
@@ -31,35 +31,45 @@ class Generator(object):
     def __init__(self):
         pass
 
-    def _find_backend(self, target):
-        """Return the appropriate GeneratorBackend to use for @target"""
-                    
-        return backends.find_backend_for_target(self._backends, target)
+    def _find_backends(self, targets):
+        return backends.find_backends_for_targets(self._backends, targets)
 
-    def generate_target_recipe(self, generic_recipe, target):
-        """Return a TargetRecipe, given a GenericRecipe and a Target."""
+    def generate_build_recipes(self, generic_recipe, targets):
+        """Return a list of BuildRecipes, given a GenericRecipe and a list of Targets."""
 
         # TODO: allow to work iteratively
         # TODO: Target-specific recipies are not only dependent on target platform
         # but also the build type and toolchain used. Add an additional parameter for this
         # DeploymentOptions ?
-        
-        if not isinstance(target, Target):
-            target = Target(target)
-        
-        backend = self._find_backend(target)
-        
-        if not backend:
-            raise ValueError, "target: %s is not supported" % target
 
-        buildsystem_type = generic_recipe.data['BuildSystemType']
-        if not buildsystem_type in backend.supported_buildsystems:
-            raise ValueError, "BuildSystemType: \"%s\" is not supported for target: \"%s\" with backend %s" % (buildsystem_type, target, backend)
+        def normalize_target(target):
+            if not isinstance(target, Target):
+                target = Target(target)
+            return target
 
-        backend_instance = backend()
-        target_recipe = backend_instance.generate_target_recipe(generic_recipe, target)
+        targets = [normalize_target(t) for t in targets]
+
+        build_recipes = []
+       
+        backends = self._find_backends(targets)
+        for backend, targets in backends:
+
+            # TODO: these should come as errors/warnings much earlier,
+            # and be more suitable for giving proper user-feedback
+            # Move into some sort of verification method, similar to
+            # what exists for the recipes themselves?
+            buildsystem_type = generic_recipe.data['BuildSystemType']
+            if not buildsystem_type in backend.supported_buildsystems:
+                raise ValueError, "BuildSystemType: \"%s\" is not supported for targets: \"%s\" with backend %s" % (buildsystem_type, targets, backend)
+            if not backend:
+                raise ValueError, "targets: %s are not supported" % targets
+
+
+            backend_instance = backend()
+            build_recipe = backend_instance.generate_build_recipe(generic_recipe, targets)        
+            build_recipes.append(build_recipe)
         
-        return target_recipe
+        return build_recipes
 
 
 class GeneratorBackendInterface(object):
@@ -72,5 +82,5 @@ class GeneratorBackendInterface(object):
         pass
         
     
-    def generate_target_recipe(self, generic_recipe, target):
+    def generate_build_recipe(self, generic_recipe, targets):
         pass

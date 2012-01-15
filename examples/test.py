@@ -13,7 +13,7 @@ def prepend_path_to_env(var, value, env=os.environ):
     
     env[var] = value + os.pathsep + env[var]
 
-def build_example(example_name, target):
+def build_example(example_name, targets):
 
     # Make sure deploymentkit from source tree is found first
     env = dict(os.environ)
@@ -25,15 +25,19 @@ def build_example(example_name, target):
 
     # Generate
     generate_cmd = ['dk-generate', input_recipe,
-                    '--output-dir=%s' % output_dir, '--target=%s' % target]
+                    '--output-dir=%s' % output_dir, '--targets=%s' % targets]
+
+    print 'INFO: running command: %s' % ' '.join(generate_cmd)
 
     error_code = subprocess.call(generate_cmd, env=env)
     if error_code:
         return error_code
 
     # Build
-    build_cmd = ['dk-build', '--target=%s' % target]
+    build_cmd = ['dk-build', '--targets=%s' % targets, '%s.build.yaml' % example_name]
     
+    print 'INFO: running command: %s' % ' '.join(build_cmd)
+
     error_code = subprocess.call(build_cmd, cwd=output_dir, env=env)
     if error_code:
         return error_code
@@ -44,7 +48,7 @@ if __name__ == '__main__':
 
     parser = optparse.OptionParser(usage="Usage: %prog [options]")
 
-    parser.add_option("-t", "--target", default='',
+    parser.add_option("-t", "--targets", default='',
                       help="The targets to test.")
     parser.add_option("-e", "--examples", default="all",
                       help="The examples to test.")
@@ -59,7 +63,7 @@ if __name__ == '__main__':
 
     # Build each example
     for ex in options.examples:
-        error = build_example(ex, options.target)
+        error = build_example(ex, options.targets)
         if error:
             sys.exit(error)
     

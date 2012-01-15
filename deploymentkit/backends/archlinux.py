@@ -12,6 +12,8 @@ archlinux_series = 'archlinux'
 archlinux_versions = ['current']
 archlinux_architectures = ['i686', 'x86_64'] # XXX: should architectures be normalized?
 
+archlinux_native_buildtoolchain = 'archlinux-native'
+
 archlinux_supported_targets = [
     target.Target("gnulinux-archlinux-current-x86_64"),
     target.Target("gnulinux-archlinux-current-i686"),
@@ -42,12 +44,7 @@ class TargetIdentifier(object):
         t = target.Target()
         t.from_members(archlinux_family, archlinux_series, 'current', arch)
         return t
-    
 
-class ArchLinuxTargetRecipe(recipe.TargetRecipe):
-    
-    def files(self):
-        return self._files
 
 class GeneratorBackend(object):
 
@@ -61,9 +58,8 @@ class GeneratorBackend(object):
     def __init__(self):
         pass
         
-    def generate_target_recipe(self, generic_recipe, target):
-    
-        assert target in self.supported_targets
+    def generate_build_recipe(self, generic_recipe, targets):
+        assert set(targets).intersection(set(self.supported_targets))
     
         # Map target independent values into target specific values.
         target_pkg_recipe = generic_to_specific_recipe(generic_recipe.data)
@@ -74,24 +70,30 @@ class GeneratorBackend(object):
         except KeyError:
             files = {}
         
-        output = ArchLinuxTargetRecipe()
-        output._files = files
+        output = recipe.BuildRecipe()
+        output.files = files.keys()
+        output.targets = targets
+        output.file_contents = files
+        output.toolchain = archlinux_native_buildtoolchain
         
         return output
 
 class BuilderBackend(object):
 
     supported_targets = archlinux_supported_targets
+    toolchain = archlinux_native_buildtoolchain
     
-    def run(self, target):
+    def run(self, build_recipe, targets):
         """ """
-        if not is_archlinux(target):
-            raise ValueError, 'Unsupported target: %s' % target
+        
+        for target in targets:
+            if not is_archlinux(target):
+                raise ValueError, 'Unsupported target: %s' % target
 
 
-        cmd = ['sudo', 'extra-%s-build' % target.architecture]
-        print 'INFO: Running command %s' % ' '.join(cmd)
-        subprocess.call(cmd)
+            cmd = ['sudo', 'extra-%s-build' % target.architecture]
+            print 'INFO: Running command %s' % ' '.join(cmd)
+            subprocess.call(cmd)
 
 class PlatformInfoBackend(object):
 

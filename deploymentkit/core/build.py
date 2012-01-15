@@ -16,33 +16,29 @@ class Builder(object):
         return supported
 
     def __init__(self):
-        self._target = None
+        pass
 
-    def run(self):
+    def run(self, recipe, targets_restriction):
+        targets_to_build = set(recipe.targets).intersection(set(targets_restriction))
+        
+        if targets_to_build:
+            backend = self._find_backend(recipe)()
+            return backend.run(recipe, targets_to_build)
+        else:
+            return None
 
-        backend = self._find_backend()()
-
-        return backend.run(self._target)
-
-    def get_target(self):
-        return self._target
-
-    def set_target(self, target):
-        self._target = target
-
-    target = property(get_target, set_target)
-
-    def _find_backend(self):
+    def _find_backend(self, recipe):
         """Return the appropriate backend to use."""
 
-        return backends.find_backend_for_target(self._backends, self.target)
+        return backends.find_build_backend_for_toolchain(self._backends, recipe.toolchain)
 
 class BuilderBackendInterface(object):
 
     supported_targets = []
+    toolchain = ''
 
     def __init__(self):
         pass
 
-    def run(self, target):
+    def run(self, build_recipe, targets):
         pass
