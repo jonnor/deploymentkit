@@ -121,4 +121,8 @@ class Target(object):
     @property
     def architecture(self):
         return self._architecture
+        
+    @property
+    def version(self):
+        return self._version
 

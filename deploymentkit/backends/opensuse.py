@@ -124,12 +124,13 @@ class BuilderBackend(object):
         spec_file = [path for path in build_recipe.files if path.endswith('.spec')][0]
         
         for target in targets:
-            # FIXME: need to pass in specified targets properly
             
             if not is_opensuse(target):
                 raise ValueError, 'Unsupported target: %s' % target
 
-            cmd = ['sudo', 'build', spec_file]
+            distro_version = target.version
+
+            cmd = ['sudo', 'build', spec_file, '--dist', distro_version]
             print 'INFO: Running command %s' % ' '.join(cmd)
             subprocess.call(cmd)
 
