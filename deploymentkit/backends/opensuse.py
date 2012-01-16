@@ -86,6 +86,24 @@ class GeneratorBackend(object):
         except KeyError:
             files = {}
 
+        def download_source_files(recipe):
+            
+            import urllib2
+            
+            files = {}
+            for url in recipe.data['Sources']:
+                
+                print 'INFO: Downloading source file: %s' % url
+                basename = url.split('/')[-1]
+                f = urllib2.urlopen(url)
+                files[basename] = f.read()
+                
+            return files
+
+        # rpmbuild requires the sources to be available locally,
+        # so we download and add to output files here
+        files.update(download_source_files(generic_recipe))
+
         output = recipe.BuildRecipe()
         output.files = files.keys()
         output.targets = targets
