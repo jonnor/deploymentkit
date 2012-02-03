@@ -4,44 +4,99 @@ See also the numerous FIXME, TODO and XXX comments in the source code.
 == 0.1.0 release ==
 Criteria:
     Can build simple package recipes for common GNU/Linux targets
-        Ubuntu/Fedora/ArchLinux
+        Ubuntu/Fedora/openSUSE/ArchLinux
     Name has been decided?
 
-== In DeploymentKit ==
-* Extend existing target support
- * Resolve non-installed dependencies
- * Multiple (sub/binary) packages
- * Post/Pre Install/Uninstall script support
+Core
 
-* New build system support
- * qmake
- * python distutils
- * cmake
- * scons
+* Add deployment options
+Let dk-generate and associated take an _optional_ YAML file with the
+deployment options. This file gives the target specific configuration detailing how
+how to create a given build recipe. This allows the package recipe to be
+completely free of target-dependent configuration
+Acts as overrides to the default/system configuration
 
+Example uses:
+- Overriding how a dependency should be resolved
+For instance for bundling, or static dep resolvement for testing
+- Which toolchain should be used, and any options for that toolchain
+- Any special configure/build options for the given target
+
+Format:
+- list of entries matching against targets
+- The options for this entry then applies to the given targets.
+- Matching should allow wildcards
+
+* Add Provides attribute to the package recipe
+Lists which identifiers this package provides. Provides: ['pkgconfig:gegl-0.1', 'executable:gegl']
+This allows DeploymentKit to automatically find dependencies for bundling
+by looking in the current directory for recipes which provides the dependency
+wanted.
+
+Testing
+ * Set/hook up OBS/Launchpad/native builders to run the example builds
+
+Backends
 * New target support
  * Fedora
- * RHEL/CentOS
- * Debian
- * Ubuntu
- * Mandriva
- * Gentoo
- * Embedded Linux
-  * openWRT, Yocto
- * Mobile Linux
-  * Maemo5 Fremantle, MeeGo Harmattan
- * other GNU/Linux...
+ * Ubuntu & Debian
+ 
+* Generic dependency resolving
+It should be possible to resolve dependencies for all targets on any host
+system. Otherwise developers will not be able to generate the build recipes
+on their own systems and be able to send them to a package builder service
+for building.
+This will require the package/repositories metadata of GNU/Linux systems
+to be available for download, and that this can be used by DeploymentKit
 
+== 0.2.0 ==
+
+Core
+* Support for packages bundling for GNU/Linux targets
+Also needs to support "optification", using /opt/application-name as the system prefix 
+Also generate a wrapper shell script for setting up up LD_LIBRARY_PATH etc,
+and .desktop file using this script to start the application
+* Support multiple targets in combination with OBS
+Requires single .spec file with if clauses for target variations,
+and slightly different names for the debian packaging + a .dsc file
+
+Backends
+* Mobile Linux support: Maemo5 Fremantle, MeeGo Harmattan
+
+== 0.3.0 ==
+
+Backends
  * Windows mingw32 (MSI/NSIS)
  * Mac OSX (macports/fink/dmg/app bundle)
 
+== Later ==
+
+Backends
+* Post/Pre Install/Uninstall script support
+This might need to come earlier, due to it being commonly required
+for even simple applications. Typical usecase include:
+- updating mimetype handling database
+- registration of gsettings/gconf schema files
+Application developers should be able to _declare_ that they have
+certain features (GConfSchemas: ['app.schemas, additional.schemas']), and DeploymentKit will figure out what is necessary
+to make it work correctly on the different targets
+ 
+
+* New target support
+ * RHEL/CentOS
+ * Mandriva
+ * Gentoo
+ * Embedded Linux: openWRT, Yocto
+ * other GNU/Linux...
+
  * BSDs et.c.
 
-* Support for packages bundling for GNU/Linux targets
-* Support OBS usage for its supported targets
+== Maybe ==
 
-* Testing
- * Set up CI system with integration tests
+* Multiple sub (binary) packages
+This feature would be wanted by distribution packagers, but is typically
+not that important to application developers.  Out-of-scope unless
+strong arguments pro it comes up for the primary target personas.
 
 == In related projects ==
 PackageKit:

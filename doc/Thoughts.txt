@@ -1,0 +1,54 @@
+DK in context and in a wider scope - the maintainers opinions
+
+== Using DeploymentKit to help FOSS succeed ==
+
+- Make FOSS applications more available to users
+
+To reach the target audience effectively, it needs to be easy for
+the end users to install the software. This means that
+installable packages of the preferred type needs to be available
+for each of the target platforms.
+
+FOSS desktop platforms:
+On the prominent free software platforms, software is delivered
+primarily through the distributions. The current update model of
+these distributions where every type of software is treated mostly
+equally makes it hard and risky to get the latest versions of
+applications: the user typically has to update the entire system.
+
+Propritary desktop platforms:
+For good reasons and bad, most desktop users currently use Windows
+and OSX. Many FOSS applications have a very bad track record in
+providing installable packages for these platforms,
+even though the majority of users are there.
+
+Solution: Upstream application developers use DeploymentKit
+and a package builder/service to directly provide binary packages for
+each of the target platforms.
+
+- Enable testers
+
+We can do much better in enabling and empowering contributors,
+especially testers. Current status quo is that testers needs to have
+a full developer setup, and build the software himself. Depending
+on the software architecture (language, dependencies, etc.) and
+the platform of the potential contributor, this can be a _significant_ barrier
+
+Solution: Integrate DeploymentKit with continous integration systems
+and package builders/service to provide automatic builds of nightly
+packages, alpha/beta versions, feature and proposed bugfix branches.
+
+- Enable commercial developers
+
+For a free and open source software platform to be successful it
+is critical to not only attract typical FOSS developers but also
+traditional commercial software developers.
+
+These developers are used to integrated development environments where
+packaging for the target platform can be done through simple graphical
+user interfaces.
+
+Solution: Integrate DeploymentKit with the IDE and/or build system,
+allowing editing of the package recipe and deployment options to happen
+graphically, and without requiring deep knowledge of the underlying
+packaging system.
