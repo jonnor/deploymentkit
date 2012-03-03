@@ -93,7 +93,11 @@ class BuilderBackend(object):
 
             cmd = ['sudo', 'extra-%s-build' % target.architecture]
             print 'INFO: Running command %s' % ' '.join(cmd)
-            subprocess.call(cmd)
+            error_code = subprocess.call(cmd)
+            if error_code:
+                return False
+
+        return True
 
 class PlatformInfoBackend(object):
 

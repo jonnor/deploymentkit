@@ -41,4 +41,7 @@ class BuilderBackendInterface(object):
         pass
 
     def run(self, build_recipe, targets):
+        """Should return True on success, false on failure"""
+        # FIXME: allow to return a richer status object, with success/failure and detail
+        # FIXME: make this iterable, so that the consumer can drive each iteration over targets
         pass

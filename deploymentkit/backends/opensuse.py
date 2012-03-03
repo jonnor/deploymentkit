@@ -132,7 +132,11 @@ class BuilderBackend(object):
 
             cmd = ['sudo', 'build', spec_file, '--dist', distro_version]
             print 'INFO: Running command %s' % ' '.join(cmd)
-            subprocess.call(cmd)
+            error_code = subprocess.call(cmd)
+            if error_code:
+                return False
+
+        return True
 
 def generic_to_specific_recipe(generic_data):
     """Return a mapping representing the target specific recipe data

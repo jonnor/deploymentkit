@@ -47,6 +47,8 @@ if __name__ == '__main__':
     builder = build.Builder()
 
     for recipe in recipes:
-        builder.run(recipe, targets)
+        success = builder.run(recipe, targets)
+        if not success:
+            sys.exit(1)
 	
 
