@@ -8,7 +8,7 @@ Sources: ["http://www.jonnor.com/files/massifg-0.2.2.tar.gz"]
 Md5sums: ["f36f1e6b0b6743ea10c04b1af9ff80d1"]
 ProjectType: 'c-application'
 BuildSystemType: autotools
-BuildDependencies: []
-Dependencies: ["pkg-config:libgoffice-0.8", "pkg-config:gtk+-2.0"]
+BuildDependencies: ["pkg-config:libgoffice-0.8", "pkg-config:gtk+-2.0"]
+Dependencies: []
 Changelog: ""
 
