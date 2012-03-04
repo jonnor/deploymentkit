@@ -574,9 +574,12 @@ def write_build_recipe_files_to_directory(build_recipe, path):
     output_files = build_recipe.file_contents
 
     for filename, file_content in output_files.items():
-        if not os.path.exists(output_prefix):
-            os.makedirs(output_prefix)
-        f = open(os.path.join(output_prefix, filename), 'w')
+        output_path = os.path.join(output_prefix, filename)
+        output_dir = os.path.dirname(output_path)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        f = open(output_path, 'w')
         f.write(file_content)
         f.close()
 
