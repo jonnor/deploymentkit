@@ -60,7 +60,7 @@ def package_from_pkgconfig_fallback(pkg_config_id, installed_file_to_package):
 
     if not is_installed:
         # TODO: look up in package db
-        raise NotImplementedError
+        raise NotImplementedError, 'Unable to resolve non-installed dependency "%s"' % pkg_config_id
 
     # From man pkg-config
     # FIXME: handle lib64 correctly
