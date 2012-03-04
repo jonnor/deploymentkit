@@ -521,6 +521,14 @@ class BuildRecipe(object):
         self._data['Toolchain'] = toolchain
     toolchain = property(get_toolchain, set_toolchain)
 
+    def get_package_recipe(self):
+        recipe = GenericRecipe()
+        recipe.load(self._data['PackageRecipeData'])
+        return recipe
+    def set_package_recipe(self, recipe):
+        self._data['PackageRecipeData'] = recipe.data
+    package_recipe = property(get_package_recipe, set_package_recipe)
+
     def verify(self):
         return RecipeVerificationResult()
 

@@ -105,6 +105,7 @@ class GeneratorBackend(object):
         files.update(download_source_files(generic_recipe))
 
         output = recipe.BuildRecipe()
+        output.package_recipe = generic_recipe
         output.files = files.keys()
         output.targets = targets
         output.file_contents = files

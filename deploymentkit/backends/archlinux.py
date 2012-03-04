@@ -71,6 +71,7 @@ class GeneratorBackend(object):
             files = {}
         
         output = recipe.BuildRecipe()
+        output.package_recipe = generic_recipe
         output.files = files.keys()
         output.targets = targets
         output.file_contents = files

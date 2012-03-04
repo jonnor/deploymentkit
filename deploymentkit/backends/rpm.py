@@ -5,6 +5,13 @@ import subprocess
 
 from Cheetah.Template import Template
 
+def srpm_name(package_recipe):
+    pkg_data = package_recipe.data
+
+    return '%(name)s-%(version)s-%(release)s.%(ext)s' \
+        % {'name': pkg_data['Name'], 'version': pkg_data['Version'],
+        'release': pkg_data['ReleaseVersion'], 'ext': 'src.rpm'}
+
 def generate_recipe(metadata):
 
     pkg_name = metadata['Name']
