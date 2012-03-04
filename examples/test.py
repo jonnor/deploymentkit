@@ -56,7 +56,8 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if options.examples == 'all':
-        examples = os.listdir(example_dir)
+        # Ignore hidden directories
+        examples = [d for d in os.listdir(example_dir) if not d.startswith('.')]
         options.examples = examples
     else:
         options.examples = options.examples.split(',')
