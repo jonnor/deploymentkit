@@ -1,4 +1,13 @@
-DK in context and in a wider scope - the maintainers opinions
+= Beliefs =
+Beliefs that form the basis of the project.
+
+1. Software is worthless if it does not reach its target audience.
+2. Packaging and distribution are essential activies in a software project.
+3. The target audience will use multiple, different target platforms.
+4. Software authors use, and will continue to use, a plenthora of different build systems.
+5. Inventing a one-packaging-format-and-toolchain-to-rule-them-all unrealistic.
+
+= Motivation =
 
 == Using DeploymentKit to help FOSS succeed ==
 

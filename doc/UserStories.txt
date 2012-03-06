@@ -1,0 +1,26 @@
+= User stories =
+
+As a user, I want to deploy my autotools C application to {ArchLinux, Fedora, openSUSE, Ubuntu}
+
+    Acceptance tests: buildbot:example-babl-gnulinux-{archlinux,fedora,opensuse,ubuntu}-*-*
+    Documentation: README and dk-generate --help
+    
+As a user, I want to deploy my distutils Python application to {ArchLinux, Fedora, openSUSE, Ubuntu}
+
+    Acceptance tests: buildbot:deploymentkit-master-gnulinux-{archlinux,fedora,opensuse,ubuntu}-*-*
+    Documentation: README and dk-generate --help
+    
+As a user, I want to use OpenSUSE build service instead of native builders to build my packages
+
+    Acceptance tests: buildbot:obs-example-*-*
+    Documentation: ?
+
+As a user, I want to use Launchpad build service instead of self-hosted builders to build my packages
+
+    Acceptance tests: buildbot:lp-example-*-*
+    Documentation: ?
+
+As a user, I want to know how much of my target user group I can deploy my software to
+
+    Acceptance tests: unittests:dk-candeploy/reach
+    Documentation: README and dk-candeploy --help

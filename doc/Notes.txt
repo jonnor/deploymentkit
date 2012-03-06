@@ -1,0 +1,44 @@
+Random bits of documentation regarding the
+development of DeploymentKit.
+
+= Notes =
+
+- Building for multiple targets is a common, or the most common usecase
+- Software authors will often, or typically want to deploy on targets different from
+their development system.
+- The generated target-specific recipe will depend on toolchain/builder used
+For instance OBS likes its debian and spec files in a slightly different way than native toolchains.
+
+- There are different ways to build and deploy a given software on a given target
+Examples on Linux:
+    .run-style binary install wizards,
+    .bin-style single-file executables,
+    binary tarball archives,
+    native distro packaging,
+    native distro packaging combined with bundling
+
+Examples on Windows:
+    .exe-style wizard or .msi file
+    Native mingw32 toolchain, or Linux cross-compile (possibly with RPM), or
+    native Windows toolchain
+    NSIS, MS Visual Studio, wizard toolchain
+
+Examples on Mac OSX:
+    .app bundles
+    .dmg disk images
+
+A sane default needs to be used for a given target, but consumers should
+be able to override/customize the build when needed.
+
+- Consumers might want a binary package that works across similar targets,
+or one package optimized for each.
+
+- How to specify targets?
+
+Family, Variant, Architecture, Version ?
+linux-fedora-x86_64-15
+linux-archlinux-x86-2011.11.23
+windows-mobile-armv7-8
+windows-desktop-x86-xp
+mac-osx-x86-10.6
+mac-ios-armv7-4

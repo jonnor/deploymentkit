@@ -1,0 +1,120 @@
+= Target Users =
+Based on the Personas defined below.
+
+Primary targets:
+    - C the commercial application developer.
+    - Martin the open source application developer.
+
+Secondary targets:
+    - Øyvind the open source library/framework developer.
+
+Tertiary targets:
+    - Lennart the system component developer.
+    - P the Linux-distro packager.
+
+    If they want to make use of the software and find it useful, good.
+    However, no core development time will be spent on this group
+    at this time. Contributed features for this target group are accepted
+    if: the bugfixes have no disadvantage for higher priority groups
+    or the additional feature also makes sense for a higher priority group.
+
+
+Non-targets:
+    - T the open source software tester.
+    Not a target user as the software developer will do the deployment.
+    This will hopefully make Ts job easier, and remove the need for
+    him to setup and mainain a development system.
+
+= Personas =
+
+=== C the commercial application developer ===
+C is paid to write the software he does, and often does not
+use this software himself.
+
+C choses the features of the software and platforms to support
+based on how the expected finanical income that gives compared to
+the effort required.
+
+C uses an SDK+IDE provided with the system, and expects
+packaging to be done with minimum manual work.
+
+
+Based on: TODO
+
+=== Martin the open source application developer ===
+
+Martin writes his software because he thinks it is a fun and
+rewarding thing to do. He is also on of the primary users
+of his application.
+Martin would like for it to be used by
+other people as well, but does not want to work actively on
+platforms that he himself does not use. He relies on contributions
+from others to make the software run well on those platforms. These
+are others like himself, or P the Linux-disto packager and T the open
+source software tester.
+When testing custom versions of own code, Martin does think the
+effort of packaging is worth it over just installing/running directly.
+
+Martin very often uses libraries written by Øyvind.
+
+Based on: Martin Renold, MyPaint maintainer
+
+=== Øyvind the open source library/framework developer ===
+Øyvind gets paid to develop some of the libraries he does, but not all.
+
+While some of the libraries Øyvind has developed are included into
+shipped systems by default, most are not. They are most often packaged by P.
+Øyvind makes his software available as source code on his website,
+and does not want to spend effort on packaging for other people.
+When testing custom versions of own code, Øyvind does think the
+effort of packaging is worth it over just installing/running directly.
+
+Øyvinds libraries are often used by Martin. They are sometimes also
+used by X, though this is more rare.
+
+Based on: Øyvind Kolsås, GEGL maintainer
+
+=== Lennart the Linux system component developer ===
+Lennarts is paid to write his software and writes it with
+his companies usecase at the forefront of his mind.
+He likes to make software that is useful also for other systems
+but considers it someone elses job to adapt and improve it
+for those systems. Some of software will be platform-dependent
+and will not support fundamentally different types of systems.
+
+Lennarts software is shipped as part of a system install,
+and are often used by many other central components in the system.
+The other components the software uses will also be shipped with the system.
+
+Based on: Lennart Poettering, systemd maintainer
+
+=== P the Linux-distro packager ===
+P wants to contributes to the open source, and does this
+by creating packages for the software that Øyvind,
+Martin and Lennart writes. P can write scripts for automating task and
+simple applications, but does not do this very often.
+
+P thinks that using the packing system for his favorite distribution is
+quick and easy, and all packaging issues would be fixed if everyone
+just switched to this system and learned it.
+
+Based on: TODO
+
+=== T the open source software tester ===
+T contributes
+
+T mostly tests the applications Martin develops, but sometimes also
+tests the libraries that Øyvind developes. On rare occations he
+also reports bugs in the system software Lennart writes.
+
+T does not like setting up, maintaining and using a development system,
+but often does it because it is neccesary to be able to build and test custom
+versions of the software.
+
+T often does not use a packaging system when testing. He does not
+understand them very well and when Martin and Øyvind don't use them,
+why should he?
+
+Based on: TODO
+
+
