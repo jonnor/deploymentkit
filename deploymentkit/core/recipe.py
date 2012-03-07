@@ -75,7 +75,7 @@ def format_attributes(format_definition):
 def format_example(format_definition):
     example = {}
     for key, value in format_definition.items():
-        example[key] = format_definition[key][-1]
+        example[key] = format_definition[key][4]
     return example
 
 def format_documentation(format_definition):
