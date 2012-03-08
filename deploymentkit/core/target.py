@@ -7,6 +7,40 @@ import os
 from deploymentkit.core import backends
 
 
+def target_list_to_tree(targets):
+    """Convert a list of Target instances into a nested dictionary
+    with levels family, series, version and arch."""
+
+    def partition(iterable, func):
+        result = {}
+        for i in iterable:
+            result.setdefault(func(i), []).append(i)
+        return result
+
+    def get_family(t):
+        return t.family
+
+    def get_series(t):
+        return t.series
+
+    def get_version(t):
+        return t.version
+
+    def get_arch(t):
+        return t.architecture
+
+    tree = {}
+    for family, targets in partition(targets, get_family).items():
+        tree[family] = {}
+        for series, targets in partition(targets, get_series).items():
+            tree[family][series] = {}
+            for version, targets in partition(targets, get_version).items():
+                tree[family][series][version] = {}
+                for arch, targets in partition(targets, get_arch).items():
+                    assert len(targets) == 0, "Duplicate targets found"
+                    tree[family][series][version][arch] = targets[0]
+    return tree
+
 class TargetIdentifierInterface(object):
 
     @staticmethod
