@@ -7,9 +7,9 @@ import deploymentkit.core
 from deploymentkit.core import target, build, recipe
 
 def help_target_string():
-    supported = Builder.supported_targets()
-    supported_str = ", ".join([str(i) for i in supported])
-    return "Supported target platforms:\n%s" % supported_str
+    supported = build.Builder.supported_targets()
+    supported_str = "\n".join([str(i) for i in supported])
+    return "%s\n\nSupported builder targets:\n%s" % (target.TargetSpecifier.__doc__, supported_str)
 
 if __name__ == '__main__':
 
@@ -40,9 +40,9 @@ if __name__ == '__main__':
     recipes = recipe.build_recipes_from_file(input_file)
 
     if options.targets:
-        targets = target.targets_from_string(options.targets)
+        targets = target.TargetSpecifier(options.targets).get_targets()
     else:
-        targets = [deploymentkit.core.target.get_default()]
+        targets = [target.get_default()]
 
     builder = build.Builder()
 

@@ -10,8 +10,8 @@ from deploymentkit.core import recipe, target
 
 def help_targets_string():
     supported = Generator.supported_targets()
-    supported_str = ", ".join([str(i) for i in supported])
-    return "Supported target platforms:\n%s" % supported_str
+    supported_str = "\n".join([str(i) for i in supported])
+    return "%s\n\nSupported generator targets:\n%s" % (target.TargetSpecifier.__doc__, supported_str)
 
 def help_input_string():
     return recipe.GenericRecipeFormat.__doc__
@@ -62,9 +62,9 @@ if __name__ == '__main__':
             sys.exit(1)
 
         if options.targets:
-            targets = target.targets_from_string(options.targets)
+            targets = target.TargetSpecifier(options.targets).get_targets()
         else:
-            targets = [deploymentkit.core.target.get_default()]
+            targets = [target.get_default()]
 
         generator = Generator()
         build_recipes = generator.generate_build_recipes(generic_recipe, targets)

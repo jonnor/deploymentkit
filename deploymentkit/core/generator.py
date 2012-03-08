@@ -12,7 +12,9 @@ import os.path
 
 
 class Generator(object):
-    """Used to transform a GenericRecipe into BuildRecipes."""
+    """A Generator transforms a GenericRecipe into BuildRecipes.
+
+    Support for new targets can be added by implementing a GeneratorBackend."""
 
     _backends = backends.load('GeneratorBackend')
 

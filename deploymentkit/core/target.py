@@ -37,7 +37,7 @@ def get_host():
             print 'Warning: Multiple targets identified for host'
         else:
             found_target = target
-            
+
     return found_target
 
 
@@ -48,9 +48,6 @@ def get_default():
 
     return get_host()
 
-
-def targets_from_string(string):
-    return [Target(s) for s in string.split(',')]
 
 class Target(object):
     """Identifes a target (platform).
@@ -121,8 +118,27 @@ class Target(object):
     @property
     def architecture(self):
         return self._architecture
-        
+
     @property
     def version(self):
         return self._version
 
+
+class TargetSpecifier:
+    """A target or set of targets can be specified.
+
+    A target identifier is on the form \"$family-$series-$version-$architecture\".
+    A set of targets can be specified using a comma separated list of target identifiers.
+
+    Which values are supported for $family, $series, $version and $architecture depends on
+    the action to be performed."""
+
+    # TODO: support wildcards
+
+    def __init__(self, specifier_string):
+        self._specifier_string = specifier_string
+
+    def get_targets(self, valid_targets=[]):
+        """Return the list of targets specified."""
+
+        return [Target(s) for s in self._specifier_string.split(',')]
